@@ -13,7 +13,25 @@ const PORT = process.env.PORT || 8080;
 const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT_ID;
 
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname)));
+app.use(express.static('.'));
+
+// Explicit static asset routes to guarantee delivery in any cloud container
+app.get('/index.css', (req, res) => {
+  res.setHeader('Content-Type', 'text/css');
+  res.sendFile(path.join(__dirname, 'index.css'));
+});
+
+app.get('/app.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'app.js'));
+});
+
+app.get('/gate-materials.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'gate-materials.js'));
+});
+
 
 // -------------------------------------------------------------------------
 // 1. Initialize Cloud Firestore Client with Graceful Local Fallback
