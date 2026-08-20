@@ -3,10 +3,17 @@
  * Provides REST APIs, Multimodal Visual Problem Solving, and Cloud Firestore Integration.
  */
 
-const express = require('express');
-const path = require('path');
-const { Firestore } = require('@google-cloud/firestore');
-require('dotenv').config();
+let Firestore = null;
+try {
+  const gcp = require('@google-cloud/firestore');
+  Firestore = gcp.Firestore;
+} catch (e) {
+  console.warn('⚠️ @google-cloud/firestore module not loaded, using local storage mode');
+}
+
+try {
+  require('dotenv').config();
+} catch (e) {}
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -16,15 +23,24 @@ const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT_I
 app.get('/health', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.status(200).json({ status: 'healthy', uptime: process.uptime() }));
 
+// Explicit Root Route
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Allow JSON payloads up to 50MB for image uploads
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname)));
 app.use(express.static('.'));
 
-
-
 // Explicit static asset routes
+app.get('/index.html', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.get('/index.css', (req, res) => {
   res.setHeader('Content-Type', 'text/css');
   res.sendFile(path.join(__dirname, 'index.css'));
@@ -47,7 +63,7 @@ let db = null;
 let firestoreConnected = false;
 
 // Only connect to Firestore if explicit GCP credentials/project are configured in env
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS || (PROJECT_ID && PROJECT_ID !== 'focusmatrix-gate-app')) {
+if (Firestore && (process.env.GOOGLE_APPLICATION_CREDENTIALS || (PROJECT_ID && PROJECT_ID !== 'focusmatrix-gate-app'))) {
   try {
     const firestoreOptions = { projectId: PROJECT_ID };
     db = new Firestore(firestoreOptions);
@@ -60,6 +76,7 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS || (PROJECT_ID && PROJECT_ID !== 
 } else {
   console.log('ℹ️ Running in memory-storage mode (Zero-latency instant responses)');
 }
+
 
 
 // -------------------------------------------------------------------------
