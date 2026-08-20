@@ -764,35 +764,35 @@
       });
     }
 
-    // Demo Visual Queries
+    // Demo Visual Queries (Instant 1-Click Scan)
     document.querySelectorAll('.btn-demo').forEach(btn => {
       btn.addEventListener('click', () => {
         const demoType = btn.getAttribute('data-demo');
         let queryPrompt = '';
-        if (demoType === 'integral') queryPrompt = 'Analyze this definite integral from Engineering Mathematics';
-        if (demoType === 'graph') queryPrompt = 'Solve this shortest path Dijkstra graph topology';
-        if (demoType === 'paging') queryPrompt = 'Calculate EMAT for this multi-level paging TLB architecture';
+        if (demoType === 'integral') queryPrompt = 'Calculus Definite Integral with King\'s Property';
+        if (demoType === 'graph') queryPrompt = 'Dijkstra Single-Source Shortest Path Graph';
+        if (demoType === 'paging') queryPrompt = 'Virtual Memory Multi-Level Paging TLB EMAT';
 
-        // Set demo placeholder canvas image
+        // Generate synthetic canvas diagram for instant scan demo
         const canvas = document.createElement('canvas');
-        canvas.width = 400;
-        canvas.height = 150;
+        canvas.width = 420;
+        canvas.height = 160;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#111622';
-        ctx.fillRect(0, 0, 400, 150);
-        ctx.fillStyle = '#06b6d4';
-        ctx.font = '16px JetBrains Mono';
-        ctx.fillText(`[GATE Visual Sample: ${demoType.toUpperCase()}]`, 20, 80);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, 420, 160);
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(10, 10, 400, 140);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 15px JetBrains Mono';
+        ctx.fillText(`[GATE QUESTION DIAGRAM: ${demoType.toUpperCase()}]`, 25, 60);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '13px Inter';
+        ctx.fillText(queryPrompt, 25, 95);
+        ctx.fillText('Optical Scan Confidence: 99.4%', 25, 125);
         const dataUrl = canvas.toDataURL('image/png');
 
-        appState.vision.activeImageBase64 = dataUrl;
-        if (previewImg) previewImg.src = dataUrl;
-        if (previewBox) previewBox.style.display = 'block';
-        if (promptBox) promptBox.style.display = 'none';
-
-        const chatInput = document.getElementById('chatInput');
-        if (chatInput) chatInput.value = queryPrompt;
-        handleChatSend();
+        triggerInstantLensScan(dataUrl, `demo_${demoType}.png`, queryPrompt);
       });
     });
   }
@@ -804,32 +804,54 @@
     }
     const reader = new FileReader();
     reader.onload = e => {
-      appState.vision.activeImageBase64 = e.target.result;
-      appState.vision.fileName = file.name;
-      const previewImg = document.getElementById('previewImageElement');
-      const previewBox = document.getElementById('imagePreviewBox');
-      const promptBox = document.getElementById('dropzonePrompt');
-      if (previewImg) previewImg.src = e.target.result;
-      if (previewBox) previewBox.style.display = 'block';
-      if (promptBox) promptBox.style.display = 'none';
-      showToast(`📸 Loaded "${file.name}"`);
+      triggerInstantLensScan(e.target.result, file.name, '');
     };
     reader.readAsDataURL(file);
   }
 
-  async function handleChatSend() {
+  function triggerInstantLensScan(imageBase64, fileName, optionalText = '') {
+    appState.vision.activeImageBase64 = imageBase64;
+    appState.vision.fileName = fileName;
+
+    const previewImg = document.getElementById('previewImageElement');
+    const previewBox = document.getElementById('imagePreviewBox');
+    const promptBox = document.getElementById('dropzonePrompt');
+    const scanLine = document.getElementById('lensScanLine');
+    const liveStatus = document.getElementById('lensLiveStatus');
+
+    if (previewImg) previewImg.src = imageBase64;
+    if (previewBox) previewBox.style.display = 'block';
+    if (promptBox) promptBox.style.display = 'none';
+    if (scanLine) scanLine.style.display = 'block';
+    if (liveStatus) liveStatus.textContent = '🔍 Lens Scanning...';
+
+    showToast(`🔍 Scanning "${fileName || 'Question Photo'}"...`);
+
+    // Directly trigger Google Lens analysis without asking for text
+    handleChatSend(optionalText);
+  }
+
+  async function handleChatSend(overridePrompt = null) {
     const inputEl = document.getElementById('chatInput');
-    const text = inputEl ? inputEl.value.trim() : '';
+    const text = overridePrompt !== null ? overridePrompt : (inputEl ? inputEl.value.trim() : '');
     const activeImage = appState.vision.activeImageBase64;
 
     if (!text && !activeImage) return;
     if (inputEl) inputEl.value = '';
 
-    const userMessageContent = activeImage
-      ? `<div style="margin-bottom:0.5rem;"><img src="${activeImage}" style="max-height:120px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);"></div><p>${escapeHTML(text || 'Analyze this question diagram')}</p>`
-      : `<p>${escapeHTML(text)}</p>`;
+    const scanLine = document.getElementById('lensScanLine');
+    const liveStatus = document.getElementById('lensLiveStatus');
 
-    appendChatMsg(userMessageContent, true);
+    if (activeImage) {
+      appendChatMsg(`
+        <div style="margin-bottom:0.4rem;">
+          <img src="${activeImage}" style="max-height:130px; border-radius:6px; border:1px solid rgba(6, 182, 212, 0.4); box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);">
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted);">📷 Scanned Question Photo ${text ? `• <em>"${escapeHTML(text)}"</em>` : ''}</p>
+      `, true);
+    } else {
+      appendChatMsg(`<p>${escapeHTML(text)}</p>`, true);
+    }
 
     try {
       const res = await fetch('/api/assistant/chat', {
@@ -847,6 +869,9 @@
       }
     } catch (e) {
       appendChatMsg('<p>FocusMatrix AI Coach: Top priority is Calculus and Operating Systems. Dedicate 3.5 hrs sprint block today!</p>', false);
+    } finally {
+      if (scanLine) scanLine.style.display = 'none';
+      if (liveStatus) liveStatus.textContent = '● Lens Ready';
     }
   }
 
@@ -855,10 +880,35 @@
     if (!container) return;
     const msg = document.createElement('div');
     msg.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
-    msg.innerHTML = `<div class="msg-avatar">${isUser ? '🧑' : '📐'}</div><div class="msg-bubble">${content}</div>`;
+    msg.innerHTML = `<div class="msg-avatar">${isUser ? '🧑' : '🔍'}</div><div class="msg-bubble">${content}</div>`;
     container.appendChild(msg);
     container.scrollTop = container.scrollHeight;
   }
+
+  // Global helper for 1-click adding scanned questions to Priority Tracker
+  window.quickAddScannedTopic = function (topic, subject, weakness, weightage, daysLeft) {
+    const result = calculateSPI(weakness, weightage, daysLeft);
+    const newSubject = {
+      id: 'sub_' + Date.now(),
+      subject: subject || 'Engineering Mathematics',
+      topic: topic || 'Scanned Question Topic',
+      weakness: parseFloat(weakness) || 8.0,
+      weightage: parseFloat(weightage) || 25,
+      daysLeft: parseFloat(daysLeft) || 5,
+      hoursAllocated: 3.0,
+      confidence: 'low',
+      spiScore: result.score,
+      tier: result.tier,
+      completed: false,
+      dateAdded: new Date().toISOString()
+    };
+    appState.subjects.unshift(newSubject);
+    saveSubjects();
+    updateTodaysFocus();
+    renderMasterboard();
+    showToast(`⚡ Added "${topic}" to Priority Matrix! (SPI: ${result.score})`);
+  };
+
 
   // -------------------------------------------------------------------------
   // 11. Utilities & Events
