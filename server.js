@@ -9,14 +9,19 @@ const { Firestore } = require('@google-cloud/firestore');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 10000;
 const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT_ID;
+
+// Health check endpoints for Cloud Run & Render
+app.get('/health', (req, res) => res.status(200).send('OK'));
+app.get('/api/health', (req, res) => res.status(200).json({ status: 'healthy', uptime: process.uptime() }));
 
 // Allow JSON payloads up to 50MB for image uploads
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname)));
 app.use(express.static('.'));
+
 
 
 // Explicit static asset routes
@@ -260,12 +265,18 @@ app.post('/api/practice/progress', async (req, res) => {
   }
 });
 
-const { GoogleGenAI } = require('@google/genai');
+let GoogleGenAI = null;
+try {
+  const genaiPkg = require('@google/genai');
+  GoogleGenAI = genaiPkg.GoogleGenAI;
+} catch (e) {
+  console.warn('⚠️ @google/genai not loaded, using intelligent optical heuristics');
+}
 
 // Optional Gemini API Client Initialization
 let aiClient = null;
 const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-if (GEMINI_KEY) {
+if (GEMINI_KEY && GoogleGenAI) {
   try {
     aiClient = new GoogleGenAI({ apiKey: GEMINI_KEY });
     console.log('✓ Google GenAI multimodal vision initialized');
@@ -273,6 +284,7 @@ if (GEMINI_KEY) {
     console.warn('GenAI initialization fallback:', e.message);
   }
 }
+
 
 // -------------------------------------------------------------------------
 // 4. Advanced GATE Knowledge & Google Lens Multimodal Vision Engine
@@ -544,10 +556,15 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`===================================================`);
   console.log(`🚀 FocusMatrix Cloud Server running on port ${PORT}`);
-  console.log(`🌐 Local URL: http://localhost:${PORT}`);
+  console.log(`🌐 Bound to: http://0.0.0.0:${PORT}`);
   console.log(`===================================================`);
 });
+
+// Fix Render 502 Bad Gateway / keepAlive timeouts
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 125000;
+
 
