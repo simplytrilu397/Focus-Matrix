@@ -58,9 +58,27 @@ Google Cloud Build (Containerized Build)
 
 ---
 
-## 🚀 Quick Deployment to Google Cloud Run
+## 🚀 Live Deployment Options
+
+### Option A: Free Deployment via Render (Zero Credit Card Required)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+1. Go to [https://render.com/](https://render.com/) and sign in with GitHub.
+2. Click **New +** → **Web Service**.
+3. Select your repository (`Focus-Matrix`).
+4. Set:
+   - **Runtime**: `Node`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+   - **Plan**: `Free`
+5. Click **Create Web Service** to get your public `https://<service-name>.onrender.com` URL.
+
+---
+
+### Option B: Quick Deployment to Google Cloud Run
 
 For detailed instructions, see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
 
 ### 1-Command Deploy via Google Cloud Shell:
 
