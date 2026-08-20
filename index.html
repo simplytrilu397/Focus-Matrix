@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>FocusMatrix — Study Planner</title>
-  <meta name="description" content="Clean, tab-based study planner with Subject Priority Index, diagnostic practice, and AI study assistant.">
+  <title>FocusMatrix — GATE & Semester Adaptive Study Planner</title>
+  <meta name="description" content="Adaptive GATE exam & semester study planner powered by Subject Priority Index (SPI), Cloud Firestore, Firebase Auth, and AI Assistant.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
+
+  <!-- Firebase JavaScript Modular/Compat SDK v10 (Google Cloud) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -26,7 +31,10 @@
               <line x1="12" y1="12" x2="18.5" y2="8.5"></line>
             </svg>
           </div>
-          <span class="brand-name">FocusMatrix</span>
+          <div class="brand-text-col">
+            <span class="brand-name">FocusMatrix</span>
+            <span class="brand-badge">GATE CS & Cloud</span>
+          </div>
         </div>
 
         <!-- Desktop Tab Navigation -->
@@ -34,14 +42,27 @@
           <button class="nav-tab active" data-tab="home" aria-selected="true">🏠 Home</button>
           <button class="nav-tab" data-tab="calculator" aria-selected="false">⚡ Calculator</button>
           <button class="nav-tab" data-tab="subjects" aria-selected="false">📋 My Subjects</button>
-          <button class="nav-tab" data-tab="practice" aria-selected="false">🧠 Practice</button>
+          <button class="nav-tab" data-tab="practice" aria-selected="false">🧠 GATE Materials</button>
           <button class="nav-tab" data-tab="assistant" aria-selected="false">💬 AI Assistant</button>
         </nav>
 
-        <button class="theme-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark">
-          <span class="icon-dark">🌙</span>
-          <span class="icon-light">☀️</span>
-        </button>
+        <!-- Right Header Actions (Auth, Cloud Sync, Theme) -->
+        <div class="header-actions">
+          <div class="cloud-sync-pill" id="cloudSyncPill" title="Cloud Firestore Sync Status">
+            <span class="sync-dot"></span>
+            <span class="sync-text" id="syncStatusText">Cloud Ready</span>
+          </div>
+
+          <button class="user-auth-btn" id="userAuthBtn" title="Account & Firebase Login">
+            <span class="user-avatar" id="userAvatarText">👤</span>
+            <span class="user-label" id="userDisplayName">Sign In</span>
+          </button>
+
+          <button class="theme-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark">
+            <span class="icon-dark">🌙</span>
+            <span class="icon-light">☀️</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -54,28 +75,29 @@
         <div class="panel-top">
           <div class="focus-hero" id="focusHero">
             <div class="focus-hero-meta">
-              <span class="subject-chip" id="focusSubjectBadge">Mathematics</span>
+              <span class="subject-chip" id="focusSubjectBadge">Engineering Mathematics</span>
               <span class="streak-badge" id="streakBadge">🔥 7-Day Streak</span>
+              <span class="cloud-tag" id="focusCloudTag">☁️ Synced</span>
             </div>
-            <h2 class="focus-hero-title" id="focusTopicTitle">Calculus — Integration by Parts</h2>
-            <p class="focus-hero-reason" id="focusTopicReason">Highest combined exam weight and critical difficulty gap.</p>
+            <h2 class="focus-hero-title" id="focusTopicTitle">Calculus — Integration by Parts & Definite Integrals</h2>
+            <p class="focus-hero-reason" id="focusTopicReason">Highest combined GATE exam weight and critical difficulty gap.</p>
             <div class="focus-stats-row">
               <div class="focus-stat">
                 <span class="stat-label">SPI Score</span>
                 <span class="stat-value score-crit" id="focusTopicScore">92 / 100</span>
               </div>
               <div class="focus-stat">
-                <span class="stat-label">Exam In</span>
+                <span class="stat-label">Exam Runway</span>
                 <span class="stat-value" id="focusTopicDays">4 Days</span>
               </div>
               <div class="focus-stat">
-                <span class="stat-label">Block</span>
+                <span class="stat-label">Sprint Block</span>
                 <span class="stat-value" id="focusTopicHours">3.5 hrs</span>
               </div>
             </div>
             <div class="focus-hero-actions">
-              <button class="btn-primary" id="btnMarkFocusDone">✓ Mark Done</button>
-              <button class="btn-ghost" id="btnNextFocusTopic">⇄ Next Topic</button>
+              <button class="btn-primary" id="btnMarkFocusDone">✓ Mark Complete</button>
+              <button class="btn-ghost" id="btnNextFocusTopic">⇄ Shuffle Topic</button>
             </div>
           </div>
         </div>
@@ -109,7 +131,7 @@
 
       <!-- ── TAB: CALCULATOR ── -->
       <section class="tab-panel" id="panel-calculator" data-tab="calculator" aria-label="Calculator" hidden>
-        <!-- Live Results — shown at top on mobile -->
+        <!-- Live Results -->
         <div class="card results-card" id="resultsSection">
           <div class="card-header-row">
             <h3 class="card-heading">Priority Score</h3>
@@ -180,18 +202,18 @@
               <div class="form-group">
                 <label for="subjectSelect" class="form-label">Subject</label>
                 <select id="subjectSelect" class="form-control">
-                  <option value="Mathematics">📐 Mathematics</option>
-                  <option value="Physics">⚡ Physics</option>
-                  <option value="Chemistry">🧪 Chemistry</option>
-                  <option value="Computer Science">💻 Computer Science</option>
-                  <option value="Biology">🧬 Biology</option>
-                  <option value="Data Structures">🌳 Data Structures</option>
-                  <option value="General Science">🔬 General Science</option>
+                  <option value="Engineering Mathematics">📐 Engineering Mathematics</option>
+                  <option value="Data Structures & Algorithms">💻 Data Structures & Algorithms</option>
+                  <option value="Operating Systems">⚡ Operating Systems</option>
+                  <option value="Database Management Systems">🗄️ Database Management Systems</option>
+                  <option value="Computer Networks">🌐 Computer Networks</option>
+                  <option value="General Aptitude">🧠 General Aptitude</option>
+                  <option value="Discrete Mathematics">🔢 Discrete Mathematics</option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="topicNameInput" class="form-label">Topic Name</label>
-                <input type="text" id="topicNameInput" class="form-control" placeholder="e.g. Integration by Parts" value="Electromagnetic Induction">
+                <input type="text" id="topicNameInput" class="form-control" placeholder="e.g. Eigenvalues & Cayley-Hamilton" value="Linear Algebra — Eigenvalues">
               </div>
             </div>
 
@@ -202,12 +224,12 @@
                 <span class="slider-val" id="weaknessValBadge">8 / 10</span>
               </div>
               <input type="range" id="weaknessSlider" class="slider" min="1" max="10" step="0.5" value="8">
-              <div class="slider-ticks"><span>Easy</span><span>Hard</span></div>
+              <div class="slider-ticks"><span>Easy (1)</span><span>Hard (10)</span></div>
             </div>
 
             <div class="slider-group">
               <div class="slider-header">
-                <label for="weightageSlider" class="form-label">Exam Weightage</label>
+                <label for="weightageSlider" class="form-label">GATE Exam Weightage</label>
                 <span class="slider-val" id="weightageValBadge">25%</span>
               </div>
               <input type="range" id="weightageSlider" class="slider" min="5" max="40" step="1" value="25">
@@ -265,14 +287,17 @@
       <section class="tab-panel" id="panel-subjects" data-tab="subjects" aria-label="My Subjects" hidden>
         <div class="card">
           <div class="card-header-row">
-            <h3 class="card-heading">📋 Priority Index</h3>
+            <div>
+              <h3 class="card-heading">📋 Priority Index</h3>
+              <span class="muted-label" id="cloudStorageStatus">☁️ Cloud Firestore Synced</span>
+            </div>
             <span class="count-pill"><span id="totalSubjectsCount">5</span> Topics</span>
           </div>
 
           <!-- Search -->
           <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="indexSearchInput" class="search-input" placeholder="Search topics...">
+            <input type="text" id="indexSearchInput" class="search-input" placeholder="Search GATE topics...">
             <button class="clear-btn" id="btnClearSearch" aria-label="Clear search">✕</button>
           </div>
 
@@ -289,11 +314,11 @@
           <div class="sort-row">
             <label for="indexSortSelect" class="muted-label">Sort by:</label>
             <select id="indexSortSelect" class="sort-select">
-              <option value="spi_desc">Highest Priority</option>
+              <option value="spi_desc">Highest Priority (SPI)</option>
               <option value="spi_asc">Lowest Priority</option>
-              <option value="days_asc">Closest Exam</option>
-              <option value="weakness_desc">Hardest First</option>
-              <option value="weight_desc">Highest Weightage</option>
+              <option value="days_asc">Closest Exam Runway</option>
+              <option value="weakness_desc">Hardest Difficulty First</option>
+              <option value="weight_desc">Highest Exam Weightage</option>
             </select>
           </div>
 
@@ -309,28 +334,36 @@
 
           <!-- Bottom actions -->
           <div class="card-bottom-actions">
+            <button class="btn-ghost" id="btnSyncCloud">☁️ Sync to Cloud</button>
             <button class="btn-ghost" id="btnResetToDefaults">↺ Reset Data</button>
             <button class="btn-ghost" id="btnExportJSON">📥 Export JSON</button>
           </div>
         </div>
       </section>
 
-      <!-- ── TAB: PRACTICE ── -->
-      <section class="tab-panel" id="panel-practice" data-tab="practice" aria-label="Practice" hidden>
+      <!-- ── TAB: PRACTICE & GATE MATERIALS ── -->
+      <section class="tab-panel" id="panel-practice" data-tab="practice" aria-label="GATE Materials & Practice" hidden>
         <div class="card">
           <div class="card-header-row">
-            <h3 class="card-heading">🧠 Weak Topic Practice</h3>
+            <div>
+              <h3 class="card-heading">🧠 GATE Materials & PYQ Solver</h3>
+              <span class="muted-label" id="gateSyllabusBadge">Official GATE CS Syllabus</span>
+            </div>
             <span class="count-pill" id="practiceSolvedCount">0 / 2 Solved</span>
           </div>
 
           <!-- Subject tabs -->
-          <div class="subject-tabs" role="tablist" aria-label="Subject tabs">
-            <button class="tab-btn active" data-subject="Mathematics">📐 Maths</button>
-            <button class="tab-btn" data-subject="Physics">⚡ Physics</button>
-            <button class="tab-btn" data-subject="Chemistry">🧪 Chemistry</button>
-            <button class="tab-btn" data-subject="Computer Science">💻 CS</button>
-            <button class="tab-btn" data-subject="Biology">🧬 Biology</button>
+          <div class="subject-tabs" id="practiceSubjectTabs" role="tablist" aria-label="GATE Subject tabs">
+            <button class="tab-btn active" data-subject="gate_eng_maths">📐 Engg Maths</button>
+            <button class="tab-btn" data-subject="gate_dsa">💻 DSA</button>
+            <button class="tab-btn" data-subject="gate_os">⚡ OS</button>
+            <button class="tab-btn" data-subject="gate_dbms">🗄️ DBMS</button>
+            <button class="tab-btn" data-subject="gate_cn">🌐 Networks</button>
+            <button class="tab-btn" data-subject="gate_aptitude">🧠 Aptitude</button>
           </div>
+
+          <!-- Quick Formulas & Cheat Sheets Drawer -->
+          <div class="cheat-sheet-box" id="cheatSheetContainer"></div>
 
           <!-- Topic chips -->
           <div class="topic-chips" id="weakTopicsChipContainer" role="group" aria-label="Select weak topic"></div>
@@ -340,14 +373,19 @@
             <button class="diff-btn active" data-diff="all">All</button>
             <button class="diff-btn" data-diff="Easy">Easy</button>
             <button class="diff-btn" data-diff="Medium">Medium</button>
-            <button class="diff-btn" data-diff="Hard">Hard</button>
+            <button class="diff-btn" data-diff="Hard">Hard (GATE Level)</button>
           </div>
 
           <!-- Question heading -->
-          <h4 class="q-section-title" id="practiceQuestionFeedTitle">Select a weak topic above to load questions</h4>
+          <h4 class="q-section-title" id="practiceQuestionFeedTitle">Select a topic above to load questions</h4>
 
           <!-- Questions container -->
           <div class="questions-list" id="questionListContainer" role="list"></div>
+
+          <!-- Cloud Materials Actions -->
+          <div class="card-bottom-actions">
+            <button class="btn-ghost" id="btnSeedFirestore">☁️ Seed All Materials to Firestore</button>
+          </div>
         </div>
       </section>
 
@@ -355,17 +393,17 @@
       <section class="tab-panel" id="panel-assistant" data-tab="assistant" aria-label="AI Assistant" hidden>
         <div class="card chat-card">
           <div class="card-header-row">
-            <h3 class="card-heading">💬 Study Assistant</h3>
-            <span class="muted-label">Smart Planner</span>
+            <h3 class="card-heading">💬 GATE Study Assistant</h3>
+            <span class="muted-label">Smart AI Coach</span>
           </div>
 
           <!-- Suggested prompts -->
           <div class="chat-suggestions">
-            <button class="suggest-chip" data-prompt="What should I study today?">What should I study today?</button>
-            <button class="suggest-chip" data-prompt="Which topics are most critical?">Which are most critical?</button>
+            <button class="suggest-chip" data-prompt="What should I study today for GATE?">What to study today?</button>
+            <button class="suggest-chip" data-prompt="Which GATE topics are most critical?">Critical topics?</button>
             <button class="suggest-chip" data-prompt="Give me a study plan for tomorrow">Plan for tomorrow</button>
             <button class="suggest-chip" data-prompt="How many hours should I study?">How many hours?</button>
-            <button class="suggest-chip" data-prompt="Which topic has the highest exam weight?">Highest exam weight?</button>
+            <button class="suggest-chip" data-prompt="Which topic has the highest exam weight?">Highest weightage?</button>
           </div>
 
           <!-- Chat messages -->
@@ -373,14 +411,14 @@
             <div class="chat-msg bot-msg">
               <div class="msg-avatar">🤖</div>
               <div class="msg-bubble">
-                <p>Hey! I'm your Study Assistant. I can see your subject list and help you plan your revision strategy. Ask me anything — like <em>"What should I study today?"</em> or <em>"Which topics are critical?"</em></p>
+                <p>Hey! I'm your GATE & Semester Study Assistant. I can analyze your priority index, track your weak concepts, and draft personalized revision schedules. Ask me anything — like <em>"What should I study today?"</em> or <em>"Which topics are critical?"</em></p>
               </div>
             </div>
           </div>
 
           <!-- Chat Input -->
           <div class="chat-input-row">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything about your study plan..." aria-label="Type a message">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything about your GATE study plan..." aria-label="Type a message">
             <button class="btn-primary chat-send-btn" id="chatSendBtn" aria-label="Send message">Send</button>
           </div>
         </div>
@@ -402,9 +440,9 @@
         <span class="nav-icon">📋</span>
         <span class="nav-label">Subjects</span>
       </button>
-      <button class="bottom-nav-btn" data-tab="practice" aria-label="Practice">
+      <button class="bottom-nav-btn" data-tab="practice" aria-label="GATE Materials">
         <span class="nav-icon">🧠</span>
-        <span class="nav-label">Practice</span>
+        <span class="nav-label">GATE</span>
       </button>
       <button class="bottom-nav-btn" data-tab="assistant" aria-label="AI Assistant">
         <span class="nav-icon">💬</span>
@@ -414,9 +452,95 @@
 
   </div><!-- /app-shell -->
 
+  <!-- ======================== AUTH & CLOUD MODAL ======================== -->
+  <div class="modal-backdrop" id="authModalBackdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <span class="modal-icon">🔐</span>
+          <h3 class="modal-title" id="modalTitle">Account & Cloud Sync</h3>
+        </div>
+        <button class="modal-close-btn" id="btnAuthModalClose" aria-label="Close modal">✕</button>
+      </div>
+
+      <!-- Auth Tab Switches -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tabSignIn" data-auth-tab="signin">Sign In</button>
+        <button class="auth-tab" id="tabSignUp" data-auth-tab="signup">Register</button>
+        <button class="auth-tab" id="tabCloudConfig" data-auth-tab="config">Firebase Settings</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Sign In & Register Form -->
+        <form id="authForm" onsubmit="return false;">
+          <div class="form-group" id="groupDisplayName" style="display: none;">
+            <label for="authDisplayName" class="form-label">Your Name</label>
+            <input type="text" id="authDisplayName" class="form-control" placeholder="e.g. Alex Sharma">
+          </div>
+
+          <div class="form-group">
+            <label for="authEmail" class="form-label">Email Address</label>
+            <input type="email" id="authEmail" class="form-control" placeholder="student@gate.edu" required>
+          </div>
+
+          <div class="form-group">
+            <label for="authPassword" class="form-label">Password</label>
+            <input type="password" id="authPassword" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <div class="auth-actions">
+            <button type="button" class="btn-primary auth-submit-btn" id="btnAuthSubmit">Sign In</button>
+            <button type="button" class="btn-ghost google-btn" id="btnGoogleSignIn">
+              <span class="google-icon">G</span> Continue with Google
+            </button>
+          </div>
+        </form>
+
+        <!-- Firebase Cloud Project Config View -->
+        <div id="cloudConfigSection" style="display: none;">
+          <p class="config-desc">Manage your Firebase project connection for Google Cloud deployment:</p>
+          <div class="form-group">
+            <label for="cfgProjectId" class="form-label">Firebase / Google Cloud Project ID</label>
+            <input type="text" id="cfgProjectId" class="form-control" placeholder="focusmatrix-gate">
+          </div>
+          <div class="form-group">
+            <label for="cfgApiKey" class="form-label">Web API Key</label>
+            <input type="text" id="cfgApiKey" class="form-control" placeholder="AIzaSy...">
+          </div>
+          <div class="form-group">
+            <label for="cfgAuthDomain" class="form-label">Auth Domain</label>
+            <input type="text" id="cfgAuthDomain" class="form-control" placeholder="your-project.firebaseapp.com">
+          </div>
+          <div class="auth-actions">
+            <button type="button" class="btn-primary" id="btnSaveFirebaseConfig">💾 Save Configuration</button>
+          </div>
+        </div>
+
+        <!-- Logged In State Profile View -->
+        <div id="userProfileSection" style="display: none;">
+          <div class="profile-card">
+            <div class="profile-avatar-lg" id="profileAvatarLarge">👤</div>
+            <div class="profile-info">
+              <h4 class="profile-name" id="profileNameDisplay">GATE Student</h4>
+              <span class="profile-email" id="profileEmailDisplay">student@gate.edu</span>
+              <span class="cloud-status-tag" id="profileCloudStatus">☁️ Cloud Firestore Active</span>
+            </div>
+          </div>
+          <div class="auth-actions">
+            <button type="button" class="btn-primary" id="btnTriggerCloudSync">☁️ Sync All Subjects Now</button>
+            <button type="button" class="btn-ghost" id="btnLogoutUser">🚪 Log Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast container -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
+  <!-- Scripts -->
+  <script src="gate-materials.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
