@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>FocusMatrix — Study Planner</title>
+  <meta name="description" content="Clean, tab-based study planner with Subject Priority Index, diagnostic practice, and AI study assistant.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- App Shell -->
+  <div class="app-shell" id="appShell">
+
+    <!-- ======================== TOP HEADER ======================== -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="2" x2="12" y2="12"></line>
+              <line x1="12" y1="12" x2="18.5" y2="8.5"></line>
+            </svg>
+          </div>
+          <span class="brand-name">FocusMatrix</span>
+        </div>
+
+        <!-- Desktop Tab Navigation -->
+        <nav class="desktop-nav" aria-label="Main navigation">
+          <button class="nav-tab active" data-tab="home" aria-selected="true">🏠 Home</button>
+          <button class="nav-tab" data-tab="calculator" aria-selected="false">⚡ Calculator</button>
+          <button class="nav-tab" data-tab="subjects" aria-selected="false">📋 My Subjects</button>
+          <button class="nav-tab" data-tab="practice" aria-selected="false">🧠 Practice</button>
+          <button class="nav-tab" data-tab="assistant" aria-selected="false">💬 AI Assistant</button>
+        </nav>
+
+        <button class="theme-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark">
+          <span class="icon-dark">🌙</span>
+          <span class="icon-light">☀️</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ======================== TAB PANELS ======================== -->
+    <main class="main-content" id="mainContent">
+
+      <!-- ── TAB: HOME ── -->
+      <section class="tab-panel active" id="panel-home" data-tab="home" aria-label="Home">
+        <!-- Today's Focus -->
+        <div class="panel-top">
+          <div class="focus-hero" id="focusHero">
+            <div class="focus-hero-meta">
+              <span class="subject-chip" id="focusSubjectBadge">Mathematics</span>
+              <span class="streak-badge" id="streakBadge">🔥 7-Day Streak</span>
+            </div>
+            <h2 class="focus-hero-title" id="focusTopicTitle">Calculus — Integration by Parts</h2>
+            <p class="focus-hero-reason" id="focusTopicReason">Highest combined exam weight and critical difficulty gap.</p>
+            <div class="focus-stats-row">
+              <div class="focus-stat">
+                <span class="stat-label">SPI Score</span>
+                <span class="stat-value score-crit" id="focusTopicScore">92 / 100</span>
+              </div>
+              <div class="focus-stat">
+                <span class="stat-label">Exam In</span>
+                <span class="stat-value" id="focusTopicDays">4 Days</span>
+              </div>
+              <div class="focus-stat">
+                <span class="stat-label">Block</span>
+                <span class="stat-value" id="focusTopicHours">3.5 hrs</span>
+              </div>
+            </div>
+            <div class="focus-hero-actions">
+              <button class="btn-primary" id="btnMarkFocusDone">✓ Mark Done</button>
+              <button class="btn-ghost" id="btnNextFocusTopic">⇄ Next Topic</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pomodoro Timer -->
+        <div class="card">
+          <div class="card-header-row">
+            <h3 class="card-heading">⚡ Focus Sprint</h3>
+            <span class="muted-label">25-Min Pomodoro</span>
+          </div>
+          <div class="timer-display" id="timerDisplay">25:00</div>
+          <div class="timer-btns">
+            <button class="btn-primary" id="btnTimerToggle">
+              <span id="timerBtnText">▶ Start Sprint</span>
+            </button>
+            <button class="btn-ghost" id="btnTimerReset">↺ Reset</button>
+          </div>
+        </div>
+
+        <!-- Daily Progress -->
+        <div class="card">
+          <div class="card-header-row">
+            <h3 class="card-heading">🎯 Daily Progress</h3>
+            <span class="muted-label" id="dailyProgressText">2 of 5 Done</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="dailyProgressBar" style="width: 40%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB: CALCULATOR ── -->
+      <section class="tab-panel" id="panel-calculator" data-tab="calculator" aria-label="Calculator" hidden>
+        <!-- Live Results — shown at top on mobile -->
+        <div class="card results-card" id="resultsSection">
+          <div class="card-header-row">
+            <h3 class="card-heading">Priority Score</h3>
+            <span class="live-dot"><span class="dot-pulse"></span> Live</span>
+          </div>
+          <div class="score-row">
+            <div class="gauge-wrap">
+              <svg class="gauge-svg" viewBox="0 0 160 160" width="120" height="120">
+                <circle class="gauge-bg-ring" cx="80" cy="80" r="64" stroke-width="14" fill="none"/>
+                <circle class="gauge-fill-ring" id="gaugeCircle" cx="80" cy="80" r="64" stroke-width="14" fill="none" stroke-dasharray="402.12" stroke-dashoffset="56.29"/>
+              </svg>
+              <div class="gauge-label">
+                <span class="gauge-num" id="resultScoreNum">88</span>
+                <span class="gauge-sub">/ 100</span>
+              </div>
+            </div>
+            <div class="score-details">
+              <div class="tier-badge tier-critical" id="resultTierBadge">
+                <span class="tier-text" id="resultTierText">CRITICAL</span>
+              </div>
+              <p class="result-topic-name" id="resultTopicHeading">Electromagnetic Induction</p>
+              <p class="result-summary" id="resultSummaryText">High exam impact. Immediate attention needed.</p>
+            </div>
+          </div>
+
+          <!-- Breakdown Bars -->
+          <div class="breakdown-grid">
+            <div class="breakdown-row">
+              <span class="b-label">Weakness</span>
+              <div class="b-track"><div class="b-fill b-fill-weak" id="barFillWeakness" style="width:80%"></div></div>
+              <span class="b-score" id="breakdownWeaknessScore">28 / 35</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="b-label">Weightage</span>
+              <div class="b-track"><div class="b-fill b-fill-weight" id="barFillWeight" style="width:62%"></div></div>
+              <span class="b-score" id="breakdownWeightScore">21 / 35</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="b-label">Urgency</span>
+              <div class="b-track"><div class="b-fill b-fill-urgency" id="barFillUrgency" style="width:83%"></div></div>
+              <span class="b-score" id="breakdownUrgencyScore">25 / 30</span>
+            </div>
+          </div>
+
+          <!-- Recommendation -->
+          <div class="rec-box" id="recommendationCard">
+            <span class="rec-icon">💡</span>
+            <div>
+              <div class="rec-title" id="recTitle">Critical Priority Strategy</div>
+              <p class="rec-desc" id="recDescription">Schedule 2 deep-focus blocks (90 min each). Solve 10 PYQs and draft a formula cheat sheet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculator Form -->
+        <div class="card">
+          <div class="card-header-row">
+            <h3 class="card-heading">⚡ SPI Calculator</h3>
+            <div class="preset-chips" role="group" aria-label="Quick presets">
+              <button class="chip-sm" id="presetPanic">🚨 Panic</button>
+              <button class="chip-sm" id="presetBalanced">⚖️ Balanced</button>
+              <button class="chip-sm" id="presetHighYield">💎 High Yield</button>
+            </div>
+          </div>
+
+          <form id="spiCalculatorForm" onsubmit="return false;">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="subjectSelect" class="form-label">Subject</label>
+                <select id="subjectSelect" class="form-control">
+                  <option value="Mathematics">📐 Mathematics</option>
+                  <option value="Physics">⚡ Physics</option>
+                  <option value="Chemistry">🧪 Chemistry</option>
+                  <option value="Computer Science">💻 Computer Science</option>
+                  <option value="Biology">🧬 Biology</option>
+                  <option value="Data Structures">🌳 Data Structures</option>
+                  <option value="General Science">🔬 General Science</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="topicNameInput" class="form-label">Topic Name</label>
+                <input type="text" id="topicNameInput" class="form-control" placeholder="e.g. Integration by Parts" value="Electromagnetic Induction">
+              </div>
+            </div>
+
+            <!-- Sliders -->
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="weaknessSlider" class="form-label">Difficulty / Concept Gap</label>
+                <span class="slider-val" id="weaknessValBadge">8 / 10</span>
+              </div>
+              <input type="range" id="weaknessSlider" class="slider" min="1" max="10" step="0.5" value="8">
+              <div class="slider-ticks"><span>Easy</span><span>Hard</span></div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="weightageSlider" class="form-label">Exam Weightage</label>
+                <span class="slider-val" id="weightageValBadge">25%</span>
+              </div>
+              <input type="range" id="weightageSlider" class="slider" min="5" max="40" step="1" value="25">
+              <div class="slider-ticks"><span>5%</span><span>40%</span></div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="urgencySlider" class="form-label">Days Until Exam</label>
+                <span class="slider-val" id="urgencyValBadge">5 Days</span>
+              </div>
+              <input type="range" id="urgencySlider" class="slider" min="1" max="30" step="1" value="5">
+              <div class="slider-ticks"><span>1 Day</span><span>30 Days</span></div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="hoursSlider" class="form-label">Hours Needed</label>
+                <span class="slider-val" id="hoursValBadge">3.0 hrs</span>
+              </div>
+              <input type="range" id="hoursSlider" class="slider" min="0.5" max="10" step="0.5" value="3.0">
+              <div class="slider-ticks"><span>0.5 hr</span><span>10 hrs</span></div>
+            </div>
+
+            <!-- Confidence -->
+            <div class="form-group">
+              <label class="form-label">Current Mastery</label>
+              <div class="radio-group" role="radiogroup">
+                <label class="radio-pill">
+                  <input type="radio" name="confidenceLevel" value="low" checked>
+                  <span>🔴 Low</span>
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="confidenceLevel" value="medium">
+                  <span>🟡 Medium</span>
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="confidenceLevel" value="high">
+                  <span>🟢 High</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-primary" id="btnCalculateAndAdd">
+                ⚡ Add to Priority Index
+              </button>
+              <button type="button" class="btn-ghost" id="btnResetForm">↺ Clear</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ── TAB: MY SUBJECTS ── -->
+      <section class="tab-panel" id="panel-subjects" data-tab="subjects" aria-label="My Subjects" hidden>
+        <div class="card">
+          <div class="card-header-row">
+            <h3 class="card-heading">📋 Priority Index</h3>
+            <span class="count-pill"><span id="totalSubjectsCount">5</span> Topics</span>
+          </div>
+
+          <!-- Search -->
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="indexSearchInput" class="search-input" placeholder="Search topics...">
+            <button class="clear-btn" id="btnClearSearch" aria-label="Clear search">✕</button>
+          </div>
+
+          <!-- Filter chips -->
+          <div class="filter-row" role="group" aria-label="Filter by tier">
+            <button class="filter-chip active" data-filter="all" id="filterAll">All <span id="countAll">5</span></button>
+            <button class="filter-chip chip-crit" data-filter="critical" id="filterCrit">🔴 Critical <span id="countCrit">2</span></button>
+            <button class="filter-chip chip-high" data-filter="high" id="filterHigh">🟠 High <span id="countHigh">2</span></button>
+            <button class="filter-chip chip-med" data-filter="medium" id="filterMed">🔵 Moderate <span id="countMed">1</span></button>
+            <button class="filter-chip chip-done" data-filter="completed" id="filterDone">✓ Done <span id="countDone">0</span></button>
+          </div>
+
+          <!-- Sort -->
+          <div class="sort-row">
+            <label for="indexSortSelect" class="muted-label">Sort by:</label>
+            <select id="indexSortSelect" class="sort-select">
+              <option value="spi_desc">Highest Priority</option>
+              <option value="spi_asc">Lowest Priority</option>
+              <option value="days_asc">Closest Exam</option>
+              <option value="weakness_desc">Hardest First</option>
+              <option value="weight_desc">Highest Weightage</option>
+            </select>
+          </div>
+
+          <!-- Distribution bar -->
+          <div class="dist-bar" aria-label="Priority distribution">
+            <div class="dist-seg dist-crit" id="distCritSeg" style="width: 40%" title="Critical"></div>
+            <div class="dist-seg dist-high" id="distHighSeg" style="width: 40%" title="High"></div>
+            <div class="dist-seg dist-med" id="distMedSeg" style="width: 20%" title="Moderate"></div>
+          </div>
+
+          <!-- Subject card list -->
+          <div class="subject-list" id="subjectCardList" role="list" aria-label="Prioritized subjects"></div>
+
+          <!-- Bottom actions -->
+          <div class="card-bottom-actions">
+            <button class="btn-ghost" id="btnResetToDefaults">↺ Reset Data</button>
+            <button class="btn-ghost" id="btnExportJSON">📥 Export JSON</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB: PRACTICE ── -->
+      <section class="tab-panel" id="panel-practice" data-tab="practice" aria-label="Practice" hidden>
+        <div class="card">
+          <div class="card-header-row">
+            <h3 class="card-heading">🧠 Weak Topic Practice</h3>
+            <span class="count-pill" id="practiceSolvedCount">0 / 2 Solved</span>
+          </div>
+
+          <!-- Subject tabs -->
+          <div class="subject-tabs" role="tablist" aria-label="Subject tabs">
+            <button class="tab-btn active" data-subject="Mathematics">📐 Maths</button>
+            <button class="tab-btn" data-subject="Physics">⚡ Physics</button>
+            <button class="tab-btn" data-subject="Chemistry">🧪 Chemistry</button>
+            <button class="tab-btn" data-subject="Computer Science">💻 CS</button>
+            <button class="tab-btn" data-subject="Biology">🧬 Biology</button>
+          </div>
+
+          <!-- Topic chips -->
+          <div class="topic-chips" id="weakTopicsChipContainer" role="group" aria-label="Select weak topic"></div>
+
+          <!-- Difficulty filter -->
+          <div class="diff-filter" role="group" aria-label="Difficulty filter">
+            <button class="diff-btn active" data-diff="all">All</button>
+            <button class="diff-btn" data-diff="Easy">Easy</button>
+            <button class="diff-btn" data-diff="Medium">Medium</button>
+            <button class="diff-btn" data-diff="Hard">Hard</button>
+          </div>
+
+          <!-- Question heading -->
+          <h4 class="q-section-title" id="practiceQuestionFeedTitle">Select a weak topic above to load questions</h4>
+
+          <!-- Questions container -->
+          <div class="questions-list" id="questionListContainer" role="list"></div>
+        </div>
+      </section>
+
+      <!-- ── TAB: AI ASSISTANT ── -->
+      <section class="tab-panel" id="panel-assistant" data-tab="assistant" aria-label="AI Assistant" hidden>
+        <div class="card chat-card">
+          <div class="card-header-row">
+            <h3 class="card-heading">💬 Study Assistant</h3>
+            <span class="muted-label">Smart Planner</span>
+          </div>
+
+          <!-- Suggested prompts -->
+          <div class="chat-suggestions">
+            <button class="suggest-chip" data-prompt="What should I study today?">What should I study today?</button>
+            <button class="suggest-chip" data-prompt="Which topics are most critical?">Which are most critical?</button>
+            <button class="suggest-chip" data-prompt="Give me a study plan for tomorrow">Plan for tomorrow</button>
+            <button class="suggest-chip" data-prompt="How many hours should I study?">How many hours?</button>
+            <button class="suggest-chip" data-prompt="Which topic has the highest exam weight?">Highest exam weight?</button>
+          </div>
+
+          <!-- Chat messages -->
+          <div class="chat-messages" id="chatMessages" aria-live="polite" aria-label="Chat conversation">
+            <div class="chat-msg bot-msg">
+              <div class="msg-avatar">🤖</div>
+              <div class="msg-bubble">
+                <p>Hey! I'm your Study Assistant. I can see your subject list and help you plan your revision strategy. Ask me anything — like <em>"What should I study today?"</em> or <em>"Which topics are critical?"</em></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="chat-input-row">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything about your study plan..." aria-label="Type a message">
+            <button class="btn-primary chat-send-btn" id="chatSendBtn" aria-label="Send message">Send</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ======================== BOTTOM NAV (Mobile) ======================== -->
+    <nav class="bottom-nav" aria-label="Mobile navigation">
+      <button class="bottom-nav-btn active" data-tab="home" aria-label="Home">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="bottom-nav-btn" data-tab="calculator" aria-label="Calculator">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label">Calculator</span>
+      </button>
+      <button class="bottom-nav-btn" data-tab="subjects" aria-label="My Subjects">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Subjects</span>
+      </button>
+      <button class="bottom-nav-btn" data-tab="practice" aria-label="Practice">
+        <span class="nav-icon">🧠</span>
+        <span class="nav-label">Practice</span>
+      </button>
+      <button class="bottom-nav-btn" data-tab="assistant" aria-label="AI Assistant">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">AI</span>
+      </button>
+    </nav>
+
+  </div><!-- /app-shell -->
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
