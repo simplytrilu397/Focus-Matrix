@@ -41,23 +41,26 @@ app.get('/gate-materials.js', (req, res) => {
 });
 
 // -------------------------------------------------------------------------
-// 1. Cloud Firestore Database Initialization
+// 1. Cloud Firestore Database Initialization (Safe Non-Blocking)
 // -------------------------------------------------------------------------
 let db = null;
 let firestoreConnected = false;
 
-try {
-  const firestoreOptions = {};
-  if (PROJECT_ID) {
-    firestoreOptions.projectId = PROJECT_ID;
+// Only connect to Firestore if explicit GCP credentials/project are configured in env
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS || (PROJECT_ID && PROJECT_ID !== 'focusmatrix-gate-app')) {
+  try {
+    const firestoreOptions = { projectId: PROJECT_ID };
+    db = new Firestore(firestoreOptions);
+    firestoreConnected = true;
+    console.log(`✓ Cloud Firestore client initialized (Project: ${PROJECT_ID})`);
+  } catch (err) {
+    console.warn('⚠️ Cloud Firestore initialization fallback:', err.message);
+    firestoreConnected = false;
   }
-  db = new Firestore(firestoreOptions);
-  firestoreConnected = true;
-  console.log(`✓ Cloud Firestore client initialized (Project: ${PROJECT_ID || 'ADC Default'})`);
-} catch (err) {
-  console.warn('⚠️ Cloud Firestore initialized in local fallback mode:', err.message);
-  firestoreConnected = false;
+} else {
+  console.log('ℹ️ Running in memory-storage mode (Zero-latency instant responses)');
 }
+
 
 // -------------------------------------------------------------------------
 // 2. Comprehensive GATE Knowledge Base & Dataset
