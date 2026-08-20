@@ -390,15 +390,9 @@
         
         <div class="practice-hub">
           
-          <!-- Subject Switcher -->
-          <div class="subject-switcher" id="practiceSubjectTabs" role="tablist">
-            <button class="sub-tab-btn active" data-subject="gate_eng_maths">📐 Engg Mathematics</button>
-            <button class="sub-tab-btn" data-subject="gate_dsa">💻 DSA</button>
-            <button class="sub-tab-btn" data-subject="gate_os">⚡ Operating Systems</button>
-            <button class="sub-tab-btn" data-subject="gate_dbms">🗄️ DBMS</button>
-            <button class="sub-tab-btn" data-subject="gate_cn">🌐 Computer Networks</button>
-            <button class="sub-tab-btn" data-subject="gate_aptitude">🧠 General Aptitude</button>
-          </div>
+          <!-- Dynamic Subject Switcher for Active GATE Paper -->
+          <div class="subject-switcher" id="practiceSubjectTabs" role="tablist"></div>
+
 
           <!-- Formula Cards -->
           <div class="formula-drawer" id="cheatSheetContainer"></div>
@@ -448,27 +442,23 @@
 
               <div class="dropzone-content" id="dropzonePrompt">
                 <span class="dz-icon">📷</span>
-                <span class="dz-title">Drop, paste, or select any question photo</span>
-                <span class="dz-sub">Automatic visual recognition — no prompt needed</span>
-                <button type="button" class="btn-action primary sm" id="btnBrowsePhoto">Choose Photo / Screenshot</button>
+                <span class="dz-title">Drop question photo or click to browse</span>
+                <span class="dz-sub">Supports PNG, JPG, WEBP • Optical Lens Analysis</span>
+                <button type="button" class="btn-action primary sm" id="btnBrowsePhoto">Choose Photo</button>
               </div>
 
-              <!-- Preview Container -->
-              <div class="image-preview-box" id="imagePreviewBox" style="display: none;">
-                <img id="previewImageElement" src="" alt="Scanned Question">
-                <button type="button" class="btn-remove-img" id="btnRemoveImage" title="Remove Photo">✕</button>
-                <div class="lens-status-overlay" id="lensStatusOverlay">🔍 Analyzing Diagram...</div>
+              <!-- Uploaded Image Preview Frame -->
+              <div class="image-preview-frame" id="imagePreviewBox" style="display:none;">
+                <img id="previewImageElement" src="" alt="Scanned Question Diagram">
+                <button type="button" class="btn-remove-img" id="btnRemoveImage" title="Remove image">✕</button>
+                <div class="lens-status-overlay" id="lensLiveBadge">● Optical Lens Scanning</div>
               </div>
             </div>
 
-            <!-- Instant 1-Click Samples -->
-            <div class="demo-queries-box">
-              <span class="demo-label">⚡ 1-Click Sample Scans:</span>
-              <div class="demo-btn-grid">
-                <button type="button" class="btn-demo" data-demo="integral">📐 Definite Integral (Calculus)</button>
-                <button type="button" class="btn-demo" data-demo="graph">💻 Dijkstra Shortest Path Graph</button>
-                <button type="button" class="btn-demo" data-demo="paging">⚡ TLB Multi-Level Paging Architecture</button>
-              </div>
+            <!-- Sample Visual Diagrams -->
+            <div class="demo-samples-block">
+              <span class="demo-label">🧪 Quick Sample Question Diagrams:</span>
+              <div class="demo-btn-grid" id="visualDemoQueriesList"></div>
             </div>
 
             <!-- Quick Knowledge Prompts -->

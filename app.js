@@ -601,7 +601,27 @@
   // 9. GATE Materials & Diagnostic Solver
   // -------------------------------------------------------------------------
   function renderPractice() {
-    const materialsRepo = (typeof GATE_MATERIALS !== 'undefined') ? GATE_MATERIALS : {};
+    const materialsRepo = (typeof getMaterialsForPaper === 'function')
+      ? getMaterialsForPaper(appState.activePaper)
+      : (typeof GATE_MATERIALS !== 'undefined' ? GATE_MATERIALS : {});
+
+    if (!materialsRepo[appState.practice.activeSubject]) {
+      appState.practice.activeSubject = Object.keys(materialsRepo)[0] || 'sub_ga_common';
+    }
+
+    // Render Subject Switcher Tabs
+    const tabContainer = document.getElementById('practiceSubjectTabs');
+    if (tabContainer) {
+      tabContainer.innerHTML = Object.values(materialsRepo).map(s => {
+        const isActive = s.id === appState.practice.activeSubject ? 'active' : '';
+        return `
+          <button type="button" class="sub-tab-btn ${isActive}" data-subject="${s.id}">
+            <span>${s.icon}</span> <span>${escapeHTML(s.subject)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
     const subjectData = materialsRepo[appState.practice.activeSubject];
     if (!subjectData) return;
 
@@ -618,7 +638,7 @@
 
     // Render Topic Chips
     const chipContainer = document.getElementById('weakTopicsChipContainer');
-    if (chipContainer) {
+    if (chipContainer && subjectData.topics) {
       chipContainer.innerHTML = subjectData.topics.map(t => {
         const isSelected = appState.practice.selectedTopic === t.name;
         return `
@@ -631,7 +651,7 @@
     }
 
     // Filter Questions
-    let questions = [...subjectData.questions];
+    let questions = Array.isArray(subjectData.questions) ? [...subjectData.questions] : [];
     if (appState.practice.selectedTopic) {
       questions = questions.filter(q => q.topic.includes(appState.practice.selectedTopic) || appState.practice.selectedTopic.includes(q.topic));
     }
@@ -664,7 +684,7 @@
       const isSolved = appState.practice.solvedQuestions.has(q.id);
       const isSolutionOpen = appState.practice.openSolutions.has(q.id);
 
-      const optionsHTML = q.options.map((opt, oIndex) => {
+      const optionsHTML = (q.options || []).map((opt, oIndex) => {
         let optClass = '';
         if (selectedAns === oIndex) {
           optClass = isSolved ? (oIndex === q.correctIndex ? 'correct' : 'incorrect') : 'selected';
@@ -725,7 +745,6 @@
     const browseBtn = document.getElementById('btnBrowsePhoto');
     const dropzone = document.getElementById('photoDropzone');
     const previewBox = document.getElementById('imagePreviewBox');
-    const previewImg = document.getElementById('previewImageElement');
     const removeImgBtn = document.getElementById('btnRemoveImage');
     const promptBox = document.getElementById('dropzonePrompt');
 
@@ -766,16 +785,31 @@
       });
     }
 
-    // Demo Visual Queries (Instant 1-Click Scan)
-    document.querySelectorAll('.btn-demo').forEach(btn => {
+    renderVisualDemoQueries();
+  }
+
+  function renderVisualDemoQueries() {
+    const container = document.getElementById('visualDemoQueriesList');
+    if (!container) return;
+
+    const paper = (typeof ALL_GATE_PAPERS !== 'undefined' ? ALL_GATE_PAPERS.find(p => p.code === appState.activePaper) : null) || (typeof ALL_GATE_PAPERS !== 'undefined' ? ALL_GATE_PAPERS[0] : null);
+    const queries = (paper && paper.demoQueries) ? paper.demoQueries : [
+      { id: 'integral', title: 'Definite Integral', prompt: 'Calculus Definite Integral with King\'s Property' },
+      { id: 'graph', title: 'Dijkstra Graph', prompt: 'Dijkstra Single-Source Shortest Path Topology' },
+      { id: 'paging', title: 'TLB Paging EMAT', prompt: 'Virtual Memory Multi-Level Paging TLB EMAT' }
+    ];
+
+    container.innerHTML = queries.map(q => `
+      <button type="button" class="btn-demo" data-demo="${q.id}" data-prompt="${escapeHTML(q.prompt)}">
+        ${paper ? paper.icon : '⚡'} ${escapeHTML(q.title)}
+      </button>
+    `).join('');
+
+    container.querySelectorAll('.btn-demo').forEach(btn => {
       btn.addEventListener('click', () => {
         const demoType = btn.getAttribute('data-demo');
-        let queryPrompt = '';
-        if (demoType === 'integral') queryPrompt = 'Calculus Definite Integral with King\'s Property';
-        if (demoType === 'graph') queryPrompt = 'Dijkstra Single-Source Shortest Path Graph';
-        if (demoType === 'paging') queryPrompt = 'Virtual Memory Multi-Level Paging TLB EMAT';
+        const queryPrompt = btn.getAttribute('data-prompt') || 'GATE Visual Problem';
 
-        // Generate synthetic canvas diagram for instant scan demo
         const canvas = document.createElement('canvas');
         canvas.width = 420;
         canvas.height = 160;
@@ -787,7 +821,7 @@
         ctx.strokeRect(10, 10, 400, 140);
         ctx.fillStyle = '#38bdf8';
         ctx.font = 'bold 15px JetBrains Mono';
-        ctx.fillText(`[GATE QUESTION DIAGRAM: ${demoType.toUpperCase()}]`, 25, 60);
+        ctx.fillText(`[GATE ${appState.activePaper}: ${demoType.toUpperCase()}]`, 25, 60);
         ctx.fillStyle = '#94a3b8';
         ctx.font = '13px Inter';
         ctx.fillText(queryPrompt, 25, 95);
@@ -798,6 +832,7 @@
       });
     });
   }
+
 
   function handleImageLoad(file) {
     if (!file.type.startsWith('image/')) {
@@ -1303,6 +1338,39 @@
     updatePaperDisplay();
   }
 
+  function generateDefaultSubjectsForPaper(paperCode) {
+    const papersList = (typeof ALL_GATE_PAPERS !== 'undefined') ? ALL_GATE_PAPERS : [];
+    const paper = papersList.find(p => p.code === paperCode) || papersList[0];
+    const defaultSubs = (paper && paper.defaultSubjects) ? paper.defaultSubjects : ['Engineering Mathematics', 'Core Engineering Concepts', 'General Aptitude'];
+
+    const topicsMatrix = [
+      { name: 'Core Foundations & High-Yield Governing Equations', weakness: 8.5, weightage: 25, daysLeft: 4, hours: 3.5 },
+      { name: 'Analytical Step-by-Step Problem Solving & Derivations', weakness: 8.0, weightage: 22, daysLeft: 5, hours: 3.0 },
+      { name: 'Advanced Dynamic Formulations & Boundary Conditions', weakness: 7.0, weightage: 18, daysLeft: 9, hours: 2.5 },
+      { name: 'System Models, Characteristic States & PYQs', weakness: 6.5, weightage: 15, daysLeft: 12, hours: 2.0 },
+      { name: 'General Aptitude — Quantitative & Diagrammatic Reasoning', weakness: 4.5, weightage: 15, daysLeft: 18, hours: 1.5 }
+    ];
+
+    return defaultSubs.slice(0, 5).map((subName, i) => {
+      const tm = topicsMatrix[i] || topicsMatrix[0];
+      const spiRes = calculateSPI(tm.weakness, tm.weightage, tm.daysLeft);
+      return {
+        id: `sub_${paperCode.toLowerCase()}_${i + 1}`,
+        subject: subName,
+        topic: `${subName} — ${tm.name}`,
+        weakness: tm.weakness,
+        weightage: tm.weightage,
+        daysLeft: tm.daysLeft,
+        hoursAllocated: tm.hours,
+        confidence: tm.weakness >= 7 ? 'low' : tm.weakness >= 4 ? 'medium' : 'high',
+        spiScore: spiRes.score,
+        tier: spiRes.tier,
+        completed: false,
+        dateAdded: new Date(Date.now() - 86400000 * (i + 1)).toISOString()
+      };
+    });
+  }
+
   function setTargetGatePaper(paperCode) {
     const papersList = (typeof ALL_GATE_PAPERS !== 'undefined') ? ALL_GATE_PAPERS : [];
     const paper = papersList.find(p => p.code === paperCode) || papersList[0];
@@ -1311,11 +1379,32 @@
     appState.activePaper = paper.code;
     localStorage.setItem('fm_active_paper', paper.code);
 
+    // 1. Re-generate and synchronize Priority Index for the selected paper
+    appState.subjects = generateDefaultSubjectsForPaper(paper.code);
+    saveSubjects();
+
+    // 2. Update Header pill and Home banner
     updatePaperDisplay();
+
+    // 3. Reconfigure Priority Calculator subjects & default topics
     reconfigureSubjectsForPaper(paper);
+
+    // 4. Update Focus Hub and Masterboard
+    updateTodaysFocus();
+    renderMasterboard();
+
+    // 5. Reconfigure GATE Syllabus & Practice PYQ materials
+    const materialsRepo = (typeof getMaterialsForPaper === 'function') ? getMaterialsForPaper(paper.code) : {};
+    appState.practice.activeSubject = Object.keys(materialsRepo)[0] || 'sub_ga_common';
+    appState.practice.selectedTopic = null;
+    renderPractice();
+
+    // 6. Reconfigure Visual Lens Demo Diagrams for this discipline
+    renderVisualDemoQueries();
 
     showToast(`🎓 Switched to GATE ${paper.code} — ${paper.name}`);
   }
+
 
   function updatePaperDisplay() {
     const papersList = (typeof ALL_GATE_PAPERS !== 'undefined') ? ALL_GATE_PAPERS : [];
