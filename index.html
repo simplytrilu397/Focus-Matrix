@@ -31,6 +31,13 @@
           </div>
         </div>
 
+        <!-- Active Discipline Badge -->
+        <button class="active-paper-pill" id="headerPaperPill" title="Switch Target GATE Discipline">
+          <span class="paper-badge-code" id="headerPaperCode">CS</span>
+          <span class="paper-badge-name" id="headerPaperName">Computer Science</span>
+          <span class="paper-chevron">▾</span>
+        </button>
+
         <!-- Desktop Navigation Bar -->
         <nav class="desktop-nav" aria-label="Main navigation">
           <button class="nav-tab active" data-tab="home" aria-selected="true">
@@ -71,8 +78,27 @@
       <!-- ── SECTION 1: FOCUS HUB (HOME) ── -->
       <section class="tab-panel active" id="panel-home" data-tab="home" aria-label="Focus Hub">
         
+        <!-- 30 GATE Papers Selection Station -->
+        <div class="paper-selector-banner" id="paperSelectorBanner">
+          <div class="paper-selector-head">
+            <div class="ps-title-col">
+              <span class="ps-tag">🎓 30 OFFICIAL GATE DISCIPLINES</span>
+              <h3 class="ps-heading">Preparing For: <span class="active-paper-text" id="activePaperText">CS — Computer Science & IT</span></h3>
+              <p class="ps-sub" id="activePaperWeightage">Syllabus Matrix: Maths (15m) + Core CS (70m) + General Aptitude (15m)</p>
+            </div>
+            <div class="ps-dropdown-wrap">
+              <label for="gatePaperDropdown" class="ps-label">Select Target Paper:</label>
+              <select id="gatePaperDropdown" class="ps-dropdown" aria-label="Select from 30 GATE Papers"></select>
+            </div>
+          </div>
+
+          <!-- Quick access chips for high-demand disciplines -->
+          <div class="paper-quick-chips" id="paperQuickChips"></div>
+        </div>
+
         <!-- Top Focus Card -->
         <div class="hub-hero">
+
           <div class="hero-left">
             <div class="hero-meta-row">
               <span class="meta-tag tag-subject" id="focusSubjectBadge">Engineering Mathematics</span>

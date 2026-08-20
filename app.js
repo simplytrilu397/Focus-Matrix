@@ -87,6 +87,7 @@
   // -------------------------------------------------------------------------
   let appState = {
     activeTab: 'home',
+    activePaper: localStorage.getItem('fm_active_paper') || 'CS',
     subjects: loadStoredSubjects(),
     currentFilter: 'all',
     searchQuery: '',
@@ -112,6 +113,7 @@
       fileName: null
     }
   };
+
 
   // -------------------------------------------------------------------------
   // 3. Mathematical SPI Engine
@@ -1206,6 +1208,9 @@
       });
     }
 
+    // 30 GATE Papers Selector Integration
+    initGatePaperSelector();
+
     // AI & Vision
     setupVisionAndAI();
 
@@ -1231,6 +1236,126 @@
     });
   }
 
+  // -------------------------------------------------------------------------
+  // 12. 30 Official GATE Papers Selection Module
+  // -------------------------------------------------------------------------
+  function initGatePaperSelector() {
+    const dropdown = document.getElementById('gatePaperDropdown');
+    const quickChips = document.getElementById('paperQuickChips');
+    const papersList = (typeof ALL_GATE_PAPERS !== 'undefined') ? ALL_GATE_PAPERS : [];
+
+    if (dropdown && papersList.length > 0) {
+      const categories = {};
+      papersList.forEach(p => {
+        if (!categories[p.category]) categories[p.category] = [];
+        categories[p.category].push(p);
+      });
+
+      let optionsHTML = '';
+      Object.keys(categories).forEach(cat => {
+        optionsHTML += `<optgroup label="── ${escapeHTML(cat)} ──">`;
+        categories[cat].forEach(p => {
+          const isSelected = p.code === appState.activePaper ? 'selected' : '';
+          optionsHTML += `<option value="${p.code}" ${isSelected}>${p.icon} [GATE ${p.code}] ${escapeHTML(p.name)}</option>`;
+        });
+        optionsHTML += `</optgroup>`;
+      });
+      dropdown.innerHTML = optionsHTML;
+
+      dropdown.addEventListener('change', e => {
+        setTargetGatePaper(e.target.value);
+      });
+    }
+
+    if (quickChips && papersList.length > 0) {
+      const topCodes = ['CS', 'DA', 'EC', 'EE', 'ME', 'CE', 'IN', 'CH', 'XE', 'BT'];
+      quickChips.innerHTML = topCodes.map(code => {
+        const paper = papersList.find(p => p.code === code);
+        if (!paper) return '';
+        const isActive = paper.code === appState.activePaper ? 'active' : '';
+        return `
+          <button type="button" class="paper-chip-btn ${isActive}" data-paper="${paper.code}">
+            <span>${paper.icon}</span>
+            <span>GATE ${paper.code}</span>
+          </button>
+        `;
+      }).join('');
+
+      quickChips.addEventListener('click', e => {
+        const btn = e.target.closest('.paper-chip-btn');
+        if (btn) {
+          const code = btn.getAttribute('data-paper');
+          setTargetGatePaper(code);
+        }
+      });
+    }
+
+    const headerPill = document.getElementById('headerPaperPill');
+    if (headerPill) {
+      headerPill.addEventListener('click', () => {
+        switchTab('home');
+        const banner = document.getElementById('paperSelectorBanner');
+        if (banner) banner.scrollIntoView({ behavior: 'smooth' });
+        if (dropdown) dropdown.focus();
+      });
+    }
+
+    updatePaperDisplay();
+  }
+
+  function setTargetGatePaper(paperCode) {
+    const papersList = (typeof ALL_GATE_PAPERS !== 'undefined') ? ALL_GATE_PAPERS : [];
+    const paper = papersList.find(p => p.code === paperCode) || papersList[0];
+    if (!paper) return;
+
+    appState.activePaper = paper.code;
+    localStorage.setItem('fm_active_paper', paper.code);
+
+    updatePaperDisplay();
+    reconfigureSubjectsForPaper(paper);
+
+    showToast(`🎓 Switched to GATE ${paper.code} — ${paper.name}`);
+  }
+
+  function updatePaperDisplay() {
+    const papersList = (typeof ALL_GATE_PAPERS !== 'undefined') ? ALL_GATE_PAPERS : [];
+    const paper = papersList.find(p => p.code === appState.activePaper) || papersList[0];
+    if (!paper) return;
+
+    const dropdown = document.getElementById('gatePaperDropdown');
+    if (dropdown) dropdown.value = paper.code;
+
+    document.querySelectorAll('.paper-chip-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-paper') === paper.code);
+    });
+
+    const headerCode = document.getElementById('headerPaperCode');
+    const headerName = document.getElementById('headerPaperName');
+    if (headerCode) headerCode.textContent = paper.code;
+    if (headerName) headerName.textContent = paper.name.split('&')[0].trim();
+
+    const activeText = document.getElementById('activePaperText');
+    const activeWeightage = document.getElementById('activePaperWeightage');
+    if (activeText) activeText.textContent = `${paper.icon} ${paper.code} — ${paper.name}`;
+    if (activeWeightage) activeWeightage.textContent = `Syllabus Matrix: ${paper.weightage}`;
+  }
+
+  function reconfigureSubjectsForPaper(paper) {
+    const subjectSelect = document.getElementById('subjectSelect');
+    if (subjectSelect && paper.defaultSubjects) {
+      subjectSelect.innerHTML = paper.defaultSubjects.map(sub => `
+        <option value="${escapeHTML(sub)}">${paper.icon} ${escapeHTML(sub)}</option>
+      `).join('') + `<option value="General Aptitude">🧠 General Aptitude</option><option value="Engineering Mathematics">📐 Engineering Mathematics</option>`;
+    }
+
+    const topicInput = document.getElementById('topicNameInput');
+    if (topicInput && paper.defaultSubjects && paper.defaultSubjects[0]) {
+      topicInput.placeholder = `e.g. ${paper.defaultSubjects[0]} high-weight topic...`;
+    }
+
+    updateLiveCalculatorResults();
+  }
+
   function init() {
     initTheme();
     updateLiveCalculatorResults();
@@ -1249,3 +1374,4 @@
   }
 
 })();
+

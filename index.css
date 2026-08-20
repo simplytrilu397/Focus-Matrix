@@ -152,6 +152,173 @@ body {
   text-transform: uppercase;
 }
 
+/* Active Discipline Header Pill */
+.active-paper-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-active);
+  color: var(--text-main);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.active-paper-pill:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent-cyan);
+}
+
+.paper-badge-code {
+  background: #2563eb;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.paper-badge-name {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.paper-chevron {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+/* =========================================================================
+   30 GATE PAPERS SELECTION STATION (HOME BANNER)
+   ========================================================================= */
+.paper-selector-banner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem 1.5rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.paper-selector-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #2563eb, #06b6d4);
+}
+
+.paper-selector-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.ps-title-col {
+  flex: 1;
+}
+
+.ps-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ps-heading {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0.15rem 0;
+}
+
+.active-paper-text {
+  color: #38bdf8;
+}
+
+.ps-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ps-dropdown-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 260px;
+}
+
+.ps-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.ps-dropdown {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-active);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.ps-dropdown:focus {
+  border-color: var(--accent-cyan);
+}
+
+.paper-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.75rem;
+}
+
+.paper-chip-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.paper-chip-btn:hover {
+  border-color: var(--border-active);
+  color: var(--text-main);
+}
+
+.paper-chip-btn.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+}
+
 .desktop-nav {
   display: flex;
   align-items: center;
@@ -161,6 +328,7 @@ body {
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-subtle);
 }
+
 
 .nav-tab {
   background: transparent;
