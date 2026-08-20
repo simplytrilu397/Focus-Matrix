@@ -1,4 +1,4 @@
-# Production Dockerfile for Google Cloud Run
+# Production Dockerfile for FocusMatrix (Cloud Run & Render)
 FROM node:20-slim
 
 # Create and set working directory
@@ -8,17 +8,17 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install production dependencies
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 # Copy application code
 COPY . .
 
-# Configure default Cloud Run environment
+# Configure default port environment (Matches Render 10000 & Cloud Run overrides)
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV PORT=10000
 
-# Expose Cloud Run port
-EXPOSE 8080
+# Expose port
+EXPOSE 10000
 
 # Start server
 CMD [ "node", "server.js" ]
