@@ -1,13 +1,13 @@
 /**
- * FocusMatrix — Adaptive GATE Study Planner
- * Connected to Google Cloud Run Backend & Cloud Firestore
+ * FocusMatrix — Adaptive GATE Engineering Intelligence System
+ * Connected to Google Cloud Run Backend, Multimodal Vision Solver & Cloud Firestore
  */
 
 (function () {
   'use strict';
 
   // -------------------------------------------------------------------------
-  // 1. Initial State & Default Dataset (GATE CS Curriculum)
+  // 1. Initial State & Sample GATE CS Dataset
   // -------------------------------------------------------------------------
   const DEFAULT_SUBJECTS = [
     {
@@ -106,11 +106,15 @@
       answers: {},
       solvedQuestions: new Set(),
       openSolutions: new Set()
+    },
+    vision: {
+      activeImageBase64: null,
+      fileName: null
     }
   };
 
   // -------------------------------------------------------------------------
-  // 3. Subject Priority Index (SPI) Engine
+  // 3. Mathematical SPI Engine
   // -------------------------------------------------------------------------
   function calculateSPI(weakness, weightage, daysLeft) {
     const w = parseFloat(weakness) || 1;
@@ -133,7 +137,7 @@
     if (finalScore >= 75) {
       tier = 'critical';
       tierText = 'CRITICAL PRIORITY';
-      summary = 'High GATE exam weight combined with significant concept gap and impending deadline.';
+      summary = 'High GATE exam weight combined with severe concept gap and imminent runway.';
       recommendation = 'Schedule 2 deep-focus blocks (90 min each) today. Solve 10 PYQs and review cheat sheets.';
     } else if (finalScore >= 60) {
       tier = 'high';
@@ -162,30 +166,29 @@
   }
 
   // -------------------------------------------------------------------------
-  // 4. Persistence & Google Cloud Backend API Sync
+  // 4. Persistence & Cloud Sync
   // -------------------------------------------------------------------------
   function loadStoredSubjects() {
     try {
-      const stored = localStorage.getItem('fm_subjects_v1');
+      const stored = localStorage.getItem('fm_subjects_v2');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {
-      console.warn('Storage read error:', e);
+      console.warn('Storage read warning:', e);
     }
     return JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
   }
 
   function saveSubjects() {
     try {
-      localStorage.setItem('fm_subjects_v1', JSON.stringify(appState.subjects));
-      // Asynchronously sync with Google Cloud Run backend
+      localStorage.setItem('fm_subjects_v2', JSON.stringify(appState.subjects));
       fetch('/api/subjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subjects: appState.subjects })
-      }).catch(err => console.log('Local mode save (cloud sync queued)'));
+      }).catch(() => {});
     } catch (e) {
       console.error('Storage save error:', e);
     }
@@ -200,15 +203,13 @@
         renderMasterboard();
         updateTodaysFocus();
       }
-    } catch (e) {
-      // Running standalone / local
-    }
+    } catch (e) {}
   }
 
   // -------------------------------------------------------------------------
-  // 5. Tab Navigation
+  // 5. Navigation
   // -------------------------------------------------------------------------
-  function switchTab(tabId) {
+  window.switchTab = function (tabId) {
     appState.activeTab = tabId;
 
     document.querySelectorAll('.nav-tab').forEach(btn => {
@@ -233,10 +234,10 @@
     });
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  };
 
   // -------------------------------------------------------------------------
-  // 6. Home Tab — Today's Focus & Pomodoro Timer
+  // 6. Focus Hub & Sprint Timer
   // -------------------------------------------------------------------------
   function updateTodaysFocus() {
     const activeSubjects = appState.subjects.filter(s => !s.completed);
@@ -250,6 +251,7 @@
     if (progressBarEl) progressBarEl.style.width = `${pct}%`;
 
     const badgeEl = document.getElementById('focusSubjectBadge');
+    const tierBadgeEl = document.getElementById('focusTierBadge');
     const titleEl = document.getElementById('focusTopicTitle');
     const reasonEl = document.getElementById('focusTopicReason');
     const scoreEl = document.getElementById('focusTopicScore');
@@ -259,10 +261,11 @@
     if (!titleEl) return;
 
     if (activeSubjects.length === 0) {
-      if (badgeEl) badgeEl.textContent = 'All Caught Up';
+      if (badgeEl) badgeEl.textContent = 'All Completed';
+      if (tierBadgeEl) { tierBadgeEl.textContent = '100% READY'; tierBadgeEl.className = 'meta-tag tag-tier'; }
       titleEl.textContent = '🎉 All Tracked Topics Completed!';
-      if (reasonEl) reasonEl.textContent = 'Great job clearing your study index! Add new topics via the Calculator tab.';
-      if (scoreEl) scoreEl.textContent = '100%';
+      if (reasonEl) reasonEl.textContent = 'Great work! Add new topics via the SPI Engine tab to continue optimizing your study plan.';
+      if (scoreEl) scoreEl.innerHTML = `100<small>/100</small>`;
       if (daysEl) daysEl.textContent = 'Ready';
       if (hoursEl) hoursEl.textContent = '0 hrs';
       appState.currentFocusId = null;
@@ -277,11 +280,15 @@
     }
 
     if (badgeEl) badgeEl.textContent = topTopic.subject;
+    if (tierBadgeEl) {
+      tierBadgeEl.textContent = `${topTopic.tier.toUpperCase()} PRIORITY`;
+      tierBadgeEl.className = `meta-tag tag-tier score-${topTopic.tier}`;
+    }
     titleEl.textContent = topTopic.topic;
     if (reasonEl) reasonEl.textContent = `Highest revision priority (${topTopic.weightage}% paper weight, weakness ${topTopic.weakness}/10).`;
     if (scoreEl) {
-      scoreEl.textContent = `${topTopic.spiScore} / 100`;
-      scoreEl.className = `stat-value score-${topTopic.tier}`;
+      scoreEl.innerHTML = `${topTopic.spiScore}<small>/100</small>`;
+      scoreEl.className = `metric-val text-${topTopic.tier}`;
     }
     if (daysEl) daysEl.textContent = `${topTopic.daysLeft} Day${topTopic.daysLeft === 1 ? '' : 's'}`;
     if (hoursEl) hoursEl.textContent = `${topTopic.hoursAllocated} hrs`;
@@ -314,35 +321,27 @@
 
   function toggleTimer() {
     if (appState.timer.isRunning) {
-      pauseTimer();
+      clearInterval(appState.timer.intervalId);
+      appState.timer.isRunning = false;
+      const btnText = document.getElementById('timerBtnText');
+      if (btnText) btnText.textContent = '▶ Resume Sprint';
     } else {
-      startTimer();
+      appState.timer.isRunning = true;
+      const btnText = document.getElementById('timerBtnText');
+      if (btnText) btnText.textContent = '⏸ Pause Sprint';
+
+      appState.timer.intervalId = setInterval(() => {
+        if (appState.timer.remainingSeconds > 0) {
+          appState.timer.remainingSeconds--;
+          renderTimerDisplay();
+        } else {
+          clearInterval(appState.timer.intervalId);
+          appState.timer.isRunning = false;
+          if (btnText) btnText.textContent = '▶ Start Sprint';
+          showToast('⏰ 25-Min Deep Sprint Complete! Take a break.');
+        }
+      }, 1000);
     }
-  }
-
-  function startTimer() {
-    appState.timer.isRunning = true;
-    const btnText = document.getElementById('timerBtnText');
-    if (btnText) btnText.textContent = '⏸ Pause Sprint';
-
-    appState.timer.intervalId = setInterval(() => {
-      if (appState.timer.remainingSeconds > 0) {
-        appState.timer.remainingSeconds--;
-        renderTimerDisplay();
-      } else {
-        clearInterval(appState.timer.intervalId);
-        appState.timer.isRunning = false;
-        if (btnText) btnText.textContent = '▶ Start Sprint';
-        showToast('⏰ 25-Min Sprint Complete! Take a break.');
-      }
-    }, 1000);
-  }
-
-  function pauseTimer() {
-    clearInterval(appState.timer.intervalId);
-    appState.timer.isRunning = false;
-    const btnText = document.getElementById('timerBtnText');
-    if (btnText) btnText.textContent = '▶ Resume Sprint';
   }
 
   function resetTimer() {
@@ -350,7 +349,7 @@
     appState.timer.isRunning = false;
     appState.timer.remainingSeconds = appState.timer.totalSeconds;
     const btnText = document.getElementById('timerBtnText');
-    if (btnText) btnText.textContent = '▶ Start Sprint';
+    if (btnText) btnText.textContent = '▶ Start Deep Sprint';
     renderTimerDisplay();
   }
 
@@ -363,7 +362,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 7. Calculator Tab & Live Results
+  // 7. SPI Calculator
   // -------------------------------------------------------------------------
   function updateLiveCalculatorResults() {
     const weaknessEl = document.getElementById('weaknessSlider');
@@ -391,7 +390,7 @@
     document.getElementById('resultTopicHeading').textContent = topic;
     document.getElementById('resultSummaryText').textContent = result.summary;
     document.getElementById('resultTierText').textContent = result.tierText;
-    document.getElementById('resultTierBadge').className = `tier-badge tier-${result.tier}`;
+    document.getElementById('resultTierBadge').className = `tier-pill tier-${result.tier}`;
 
     // SVG Gauge
     const circle = document.getElementById('gaugeCircle');
@@ -412,7 +411,7 @@
     document.getElementById('breakdownUrgencyScore').textContent = `${result.breakdown.urgencyPts} / 30`;
     document.getElementById('barFillUrgency').style.width = `${(result.breakdown.urgencyPts / 30) * 100}%`;
 
-    document.getElementById('recTitle').textContent = `${result.tierText} Strategy`;
+    document.getElementById('recTitle').textContent = `${result.tierText} Strategy:`;
     document.getElementById('recDescription').textContent = result.recommendation;
   }
 
@@ -431,8 +430,6 @@
     const weightage = parseFloat(document.getElementById('weightageSlider').value);
     const daysLeft = parseFloat(document.getElementById('urgencySlider').value);
     const hoursAllocated = parseFloat(document.getElementById('hoursSlider').value);
-    const confidenceInput = document.querySelector('input[name="confidenceLevel"]:checked');
-    const confidence = confidenceInput ? confidenceInput.value : 'medium';
 
     const result = calculateSPI(weakness, weightage, daysLeft);
 
@@ -444,7 +441,7 @@
       weightage,
       daysLeft,
       hoursAllocated,
-      confidence,
+      confidence: weakness >= 7 ? 'low' : weakness >= 4 ? 'medium' : 'high',
       spiScore: result.score,
       tier: result.tier,
       completed: false,
@@ -494,7 +491,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 8. My Subjects (Masterboard)
+  // 8. Priority Masterboard
   // -------------------------------------------------------------------------
   function renderMasterboard() {
     const listEl = document.getElementById('subjectCardList');
@@ -555,44 +552,43 @@
 
     if (list.length === 0) {
       listEl.innerHTML = `
-        <div class="empty-state">
-          <span class="empty-icon">📂</span>
-          <div class="empty-title">No Subjects Found</div>
-          <p class="empty-desc">No topics match your current filter or search criteria.</p>
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-dim);">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">📂</div>
+          <strong>No matching topics found</strong>
+          <p style="font-size: 0.8rem; margin-top: 0.25rem;">Adjust search filters or add topics via the SPI Engine.</p>
         </div>
       `;
       return;
     }
 
     listEl.innerHTML = list.map(item => {
-      const tierClass = item.tier === 'critical' ? 'pill-crit' : item.tier === 'high' ? 'pill-high' : item.tier === 'medium' ? 'pill-med' : 'pill-low';
+      const tierClass = item.tier === 'critical' ? 'pill-crit' : item.tier === 'high' ? 'pill-high' : 'pill-med';
       const completedClass = item.completed ? 'is-completed' : '';
 
       return `
         <div class="subject-card ${completedClass}" data-id="${item.id}" role="listitem">
           <div class="sc-top">
-            <div class="sc-meta">
+            <div>
               <span class="sc-domain">${escapeHTML(item.subject)}</span>
               <h4 class="sc-title">${escapeHTML(item.topic)}</h4>
             </div>
             <div class="sc-score ${tierClass}">
-              <span class="sc-score-num">${item.spiScore}</span>
-              <span class="sc-score-tier">${item.tier.toUpperCase()}</span>
+              <span>${item.spiScore}</span>
             </div>
           </div>
 
           <div class="sc-stats">
-            <div class="sc-stat">Runway: <span>${item.daysLeft}d</span></div>
-            <div class="sc-stat">Weakness: <span>${item.weakness}/10</span></div>
-            <div class="sc-stat">Allocated: <span>${item.hoursAllocated}h</span></div>
+            <div>Runway: <span>${item.daysLeft}d</span></div>
+            <div>Weakness: <span>${item.weakness}/10</span></div>
+            <div>Allocated: <span>${item.hoursAllocated}h</span></div>
           </div>
 
           <div class="sc-actions">
             <button type="button" class="btn-sc ${item.completed ? 'done' : ''}" data-action="toggle-complete" data-id="${item.id}">
               ${item.completed ? '✓ Completed' : 'Mark Done'}
             </button>
-            <button type="button" class="btn-sc icon" data-action="focus-now" data-id="${item.id}" title="Set as Today's Focus">🎯</button>
-            <button type="button" class="btn-sc icon del" data-action="delete" data-id="${item.id}" title="Delete">🗑️</button>
+            <button type="button" class="btn-sc icon" data-action="focus-now" data-id="${item.id}" title="Focus Topic">🎯</button>
+            <button type="button" class="btn-sc icon" data-action="delete" data-id="${item.id}" title="Delete">🗑️</button>
           </div>
         </div>
       `;
@@ -600,7 +596,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 9. Practice Tab — GATE Materials & Diagnostic Solver
+  // 9. GATE Materials & Diagnostic Solver
   // -------------------------------------------------------------------------
   function renderPractice() {
     const materialsRepo = (typeof GATE_MATERIALS !== 'undefined') ? GATE_MATERIALS : {};
@@ -659,17 +655,6 @@
     const qContainer = document.getElementById('questionListContainer');
     if (!qContainer) return;
 
-    if (questions.length === 0) {
-      qContainer.innerHTML = `
-        <div class="empty-state">
-          <span class="empty-icon">📝</span>
-          <div class="empty-title">No Questions Found</div>
-          <p class="empty-desc">Try selecting another topic or difficulty filter above.</p>
-        </div>
-      `;
-      return;
-    }
-
     const letters = ['A', 'B', 'C', 'D'];
 
     qContainer.innerHTML = questions.map((q, qIndex) => {
@@ -696,134 +681,187 @@
       return `
         <div class="q-card" data-qid="${q.id}" role="listitem">
           <div class="q-meta">
-            <span class="q-topic-tag">📌 ${escapeHTML(q.topic)} ${q.pyq ? `• <strong style="color:var(--accent);">${escapeHTML(q.pyq)}</strong>` : ''}</span>
+            <span class="q-topic-tag">📌 ${escapeHTML(q.topic)} ${q.pyq ? `• <strong>${escapeHTML(q.pyq)}</strong>` : ''}</span>
             <span class="q-diff-badge diff-${q.difficulty}">${q.difficulty}</span>
           </div>
 
           <p class="q-prompt"><strong>Q${qIndex + 1}:</strong> ${escapeHTML(q.prompt)}</p>
-          ${q.formula ? `<div class="q-hint">💡 Hint / Formula: ${escapeHTML(q.formula)}</div>` : ''}
+          ${q.formula ? `<div class="q-hint">💡 Formula: ${escapeHTML(q.formula)}</div>` : ''}
 
           <div class="q-options">${optionsHTML}</div>
 
           <div class="q-actions">
             <button type="button" class="btn-check" data-action="check-answer" data-qid="${q.id}">✓ Check Answer</button>
             <button type="button" class="btn-stuck" data-action="toggle-solution" data-qid="${q.id}">
-              ${isSolutionOpen ? '▲ Hide Solution' : '🆘 I\'m Stuck! (Step-by-Step)'}
+              ${isSolutionOpen ? '▲ Hide Solution' : '🆘 Step-by-Step Solution'}
             </button>
           </div>
 
           <div class="solution-drawer ${isSolutionOpen ? 'open' : ''}">
             <div class="solution-header">
-              <span class="solution-title">📖 Step-by-Step Solution</span>
-              <span class="solution-correct">Correct: Option ${letters[q.correctIndex]}</span>
+              <span>📖 Step-by-Step Derivation</span>
+              <span>Correct: Option ${letters[q.correctIndex]}</span>
             </div>
             <div class="solution-steps">
-              <div class="solution-step"><div class="step-num-circle">1</div><div class="step-content"><div class="step-title">Concept Recognition</div><div class="step-body">${escapeHTML(q.solution.step1)}</div></div></div>
-              <div class="solution-step"><div class="step-num-circle">2</div><div class="step-content"><div class="step-title">Formula & Working</div><div class="step-body">${escapeHTML(q.solution.step2)}</div></div></div>
-              <div class="solution-step"><div class="step-num-circle">3</div><div class="step-content"><div class="step-title">Algebraic Steps</div><div class="step-body">${escapeHTML(q.solution.step3)}</div></div></div>
-              <div class="solution-step"><div class="step-num-circle">4</div><div class="step-content"><div class="step-title">Final Answer</div><div class="step-body">${escapeHTML(q.solution.step4)}</div></div></div>
+              <div class="solution-step"><div class="step-num-circle">1</div><div><strong>Concept:</strong> ${escapeHTML(q.solution.step1)}</div></div>
+              <div class="solution-step"><div class="step-num-circle">2</div><div><strong>Formula:</strong> ${escapeHTML(q.solution.step2)}</div></div>
+              <div class="solution-step"><div class="step-num-circle">3</div><div><strong>Working:</strong> ${escapeHTML(q.solution.step3)}</div></div>
+              <div class="solution-step"><div class="step-num-circle">4</div><div><strong>Answer:</strong> ${escapeHTML(q.solution.step4)}</div></div>
             </div>
-            <div class="takeaway"><strong>🎯 GATE Exam Strategy & Pitfall:</strong> ${escapeHTML(q.solution.takeaway)}</div>
+            <div class="takeaway"><strong>🎯 Strategy:</strong> ${escapeHTML(q.solution.takeaway)}</div>
           </div>
         </div>
       `;
     }).join('');
   }
 
-  function handleChoiceClick(qid, optIndex) {
-    appState.practice.answers[qid] = parseInt(optIndex, 10);
-    renderPractice();
+  // -------------------------------------------------------------------------
+  // 10. Multimodal Vision Solver & AI Coach
+  // -------------------------------------------------------------------------
+  function setupVisionAndAI() {
+    const fileInput = document.getElementById('photoFileInput');
+    const browseBtn = document.getElementById('btnBrowsePhoto');
+    const dropzone = document.getElementById('photoDropzone');
+    const previewBox = document.getElementById('imagePreviewBox');
+    const previewImg = document.getElementById('previewImageElement');
+    const removeImgBtn = document.getElementById('btnRemoveImage');
+    const promptBox = document.getElementById('dropzonePrompt');
+
+    if (browseBtn && fileInput) {
+      browseBtn.addEventListener('click', () => fileInput.click());
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) handleImageLoad(file);
+      });
+    }
+
+    if (dropzone) {
+      dropzone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+      dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleImageLoad(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    if (removeImgBtn) {
+      removeImgBtn.addEventListener('click', () => {
+        appState.vision.activeImageBase64 = null;
+        appState.vision.fileName = null;
+        if (fileInput) fileInput.value = '';
+        if (previewBox) previewBox.style.display = 'none';
+        if (promptBox) promptBox.style.display = 'flex';
+        showToast('🗑️ Removed image');
+      });
+    }
+
+    // Demo Visual Queries
+    document.querySelectorAll('.btn-demo').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const demoType = btn.getAttribute('data-demo');
+        let queryPrompt = '';
+        if (demoType === 'integral') queryPrompt = 'Analyze this definite integral from Engineering Mathematics';
+        if (demoType === 'graph') queryPrompt = 'Solve this shortest path Dijkstra graph topology';
+        if (demoType === 'paging') queryPrompt = 'Calculate EMAT for this multi-level paging TLB architecture';
+
+        // Set demo placeholder canvas image
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 150;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#111622';
+        ctx.fillRect(0, 0, 400, 150);
+        ctx.fillStyle = '#06b6d4';
+        ctx.font = '16px JetBrains Mono';
+        ctx.fillText(`[GATE Visual Sample: ${demoType.toUpperCase()}]`, 20, 80);
+        const dataUrl = canvas.toDataURL('image/png');
+
+        appState.vision.activeImageBase64 = dataUrl;
+        if (previewImg) previewImg.src = dataUrl;
+        if (previewBox) previewBox.style.display = 'block';
+        if (promptBox) promptBox.style.display = 'none';
+
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput) chatInput.value = queryPrompt;
+        handleChatSend();
+      });
+    });
   }
 
-  function handleCheckAnswer(qid) {
-    if (appState.practice.answers[qid] === undefined) {
-      showToast('⚠️ Please select an option first!', 'warning');
+  function handleImageLoad(file) {
+    if (!file.type.startsWith('image/')) {
+      showToast('⚠️ Please upload a valid image file (PNG, JPG, WEBP).', 'warning');
       return;
     }
-
-    const materialsRepo = (typeof GATE_MATERIALS !== 'undefined') ? GATE_MATERIALS : {};
-    let questionObj = null;
-    Object.values(materialsRepo).forEach(s => {
-      const found = s.questions.find(q => q.id === qid);
-      if (found) questionObj = found;
-    });
-
-    if (!questionObj) return;
-
-    const isCorrect = appState.practice.answers[qid] === questionObj.correctIndex;
-    if (isCorrect) {
-      appState.practice.solvedQuestions.add(qid);
-      showToast('🎉 Excellent! Correct Answer!');
-    } else {
-      showToast('❌ Not quite. Step-by-step solution revealed!', 'warning');
-      appState.practice.openSolutions.add(qid);
-    }
-
-    // Sync progress to backend
-    fetch('/api/practice/progress', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        questionId: qid,
-        selectedIndex: appState.practice.answers[qid],
-        isCorrect: isCorrect
-      })
-    }).catch(() => {});
-
-    renderPractice();
+    const reader = new FileReader();
+    reader.onload = e => {
+      appState.vision.activeImageBase64 = e.target.result;
+      appState.vision.fileName = file.name;
+      const previewImg = document.getElementById('previewImageElement');
+      const previewBox = document.getElementById('imagePreviewBox');
+      const promptBox = document.getElementById('dropzonePrompt');
+      if (previewImg) previewImg.src = e.target.result;
+      if (previewBox) previewBox.style.display = 'block';
+      if (promptBox) promptBox.style.display = 'none';
+      showToast(`📸 Loaded "${file.name}"`);
+    };
+    reader.readAsDataURL(file);
   }
 
-  function handleToggleSolution(qid) {
-    if (appState.practice.openSolutions.has(qid)) {
-      appState.practice.openSolutions.delete(qid);
-    } else {
-      appState.practice.openSolutions.add(qid);
-      showToast('📖 Solution revealed!');
-    }
-    renderPractice();
-  }
-
-  // -------------------------------------------------------------------------
-  // 10. AI Study Coach (Backend Route)
-  // -------------------------------------------------------------------------
   async function handleChatSend() {
     const inputEl = document.getElementById('chatInput');
-    if (!inputEl) return;
-    const text = inputEl.value.trim();
-    if (!text) return;
-    inputEl.value = '';
-    appendChatMsg(text, true);
+    const text = inputEl ? inputEl.value.trim() : '';
+    const activeImage = appState.vision.activeImageBase64;
+
+    if (!text && !activeImage) return;
+    if (inputEl) inputEl.value = '';
+
+    const userMessageContent = activeImage
+      ? `<div style="margin-bottom:0.5rem;"><img src="${activeImage}" style="max-height:120px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);"></div><p>${escapeHTML(text || 'Analyze this question diagram')}</p>`
+      : `<p>${escapeHTML(text)}</p>`;
+
+    appendChatMsg(userMessageContent, true);
 
     try {
       const res = await fetch('/api/assistant/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, subjects: appState.subjects })
+        body: JSON.stringify({
+          message: text,
+          image: activeImage,
+          subjects: appState.subjects
+        })
       });
       const data = await res.json();
       if (data && data.reply) {
         appendChatMsg(data.reply, false);
-      } else {
-        appendChatMsg('<p>I am your GATE Study Assistant. Ask me anything about your study priorities or revision plan.</p>', false);
       }
     } catch (e) {
-      // Fallback
-      appendChatMsg('<p>FocusMatrix Coach: Your top priority is Calculus & Operating Systems. Dedicate 3 hours today for maximum score boost!</p>', false);
+      appendChatMsg('<p>FocusMatrix AI Coach: Top priority is Calculus and Operating Systems. Dedicate 3.5 hrs sprint block today!</p>', false);
     }
   }
 
-  function appendChatMsg(text, isUser = false) {
-    const chatContainer = document.getElementById('chatMessages');
-    if (!chatContainer) return;
+  function appendChatMsg(content, isUser = false) {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
     const msg = document.createElement('div');
     msg.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
-    msg.innerHTML = `<div class="msg-avatar">${isUser ? '🧑' : '🤖'}</div><div class="msg-bubble">${isUser ? `<p>${escapeHTML(text)}</p>` : text}</div>`;
-    chatContainer.appendChild(msg);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    msg.innerHTML = `<div class="msg-avatar">${isUser ? '🧑' : '📐'}</div><div class="msg-bubble">${content}</div>`;
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
   }
 
   // -------------------------------------------------------------------------
-  // 11. Utilities & Theme
+  // 11. Utilities & Events
   // -------------------------------------------------------------------------
   function initTheme() {
     document.body.classList.toggle('theme-light', appState.theme === 'light');
@@ -846,34 +884,20 @@
     setTimeout(() => {
       toast.style.opacity = '0';
       setTimeout(() => toast.remove(), 300);
-    }, 3200);
+    }, 3000);
   }
 
   function escapeHTML(str) {
     if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
-  function exportStudyPlanJSON() {
-    const a = Object.assign(document.createElement('a'), {
-      href: 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState.subjects, null, 2)),
-      download: 'focusmatrix_gate_study_plan.json'
-    });
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    showToast('📥 Study Plan Exported as JSON');
-  }
-
-  // -------------------------------------------------------------------------
-  // 12. Event Listeners Initialization
-  // -------------------------------------------------------------------------
   function bindEvents() {
     // Theme Toggle
     const themeBtn = document.getElementById('themeToggleBtn');
     if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
 
-    // Tab Navigation
+    // Nav Tabs
     document.querySelectorAll('.nav-tab').forEach(t => {
       t.addEventListener('click', () => switchTab(t.getAttribute('data-tab')));
     });
@@ -881,16 +905,12 @@
       b.addEventListener('click', () => switchTab(b.getAttribute('data-tab')));
     });
 
-    // Form Sliders & Inputs
+    // Sliders
     ['weaknessSlider', 'weightageSlider', 'urgencySlider', 'hoursSlider', 'topicNameInput', 'subjectSelect'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', updateLiveCalculatorResults);
     });
-    document.querySelectorAll('input[name="confidenceLevel"]').forEach(r => {
-      r.addEventListener('change', updateLiveCalculatorResults);
-    });
 
-    // Calculator Actions
     const addBtn = document.getElementById('btnCalculateAndAdd');
     if (addBtn) addBtn.addEventListener('click', handleCalculateAndAdd);
 
@@ -910,7 +930,7 @@
     if (pBalanced) pBalanced.addEventListener('click', () => applyPreset('balanced'));
     if (pHighYield) pHighYield.addEventListener('click', () => applyPreset('highyield'));
 
-    // Today's Focus Actions
+    // Focus Actions
     const timerToggle = document.getElementById('btnTimerToggle');
     const timerReset = document.getElementById('btnTimerReset');
     const markDone = document.getElementById('btnMarkFocusDone');
@@ -921,16 +941,15 @@
     if (nextTopic) nextTopic.addEventListener('click', handleShuffleFocus);
 
     // Masterboard Filters
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        appState.currentFilter = chip.getAttribute('data-filter');
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        appState.currentFilter = btn.getAttribute('data-filter');
         renderMasterboard();
       });
     });
 
-    // Masterboard Search
     const searchInput = document.getElementById('indexSearchInput');
     const clearSearch = document.getElementById('btnClearSearch');
     if (searchInput) {
@@ -949,7 +968,6 @@
       });
     }
 
-    // Masterboard Sort
     const sortSelect = document.getElementById('indexSortSelect');
     if (sortSelect) {
       sortSelect.addEventListener('change', e => {
@@ -958,7 +976,7 @@
       });
     }
 
-    // Masterboard Card Action Delegation
+    // Card Actions
     const cardList = document.getElementById('subjectCardList');
     if (cardList) {
       cardList.addEventListener('click', e => {
@@ -981,35 +999,31 @@
           const id = focusBtn.getAttribute('data-id');
           appState.currentFocusId = id;
           updateTodaysFocus();
-          showToast('🎯 Set as Today\'s Focus Priority');
+          showToast('🎯 Set as Today\'s Focus');
           switchTab('home');
-          setTimeout(() => {
-            const hero = document.getElementById('focusHero');
-            if (hero) hero.scrollIntoView({ behavior: 'smooth' });
-          }, 100);
           return;
         }
 
         const deleteBtn = e.target.closest('[data-action="delete"]');
         if (deleteBtn) {
           const id = deleteBtn.getAttribute('data-id');
-          const item = appState.subjects.find(s => s.id === id);
-          if (confirm(`Remove "${item ? item.topic : 'this topic'}" from your priority index?`)) {
+          if (confirm('Delete this topic from Priority Index?')) {
             appState.subjects = appState.subjects.filter(s => s.id !== id);
             saveSubjects();
             renderMasterboard();
             updateTodaysFocus();
-            showToast('🗑️ Topic deleted');
+            showToast('🗑️ Deleted');
           }
         }
       });
     }
 
-    // Masterboard Bottom Actions
-    const resetDataBtn = document.getElementById('btnResetToDefaults');
+    // Footer actions
+    const syncBtn = document.getElementById('btnSyncCloud');
+    const resetBtn = document.getElementById('btnResetToDefaults');
     const exportBtn = document.getElementById('btnExportJSON');
-    const syncCloudBtn = document.getElementById('btnSyncCloud');
-    if (resetDataBtn) resetDataBtn.addEventListener('click', () => {
+    if (syncBtn) syncBtn.addEventListener('click', () => { saveSubjects(); showToast('☁️ Synced to Cloud Firestore'); });
+    if (resetBtn) resetBtn.addEventListener('click', () => {
       if (confirm('Reset to sample GATE study dataset?')) {
         appState.subjects = JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
         saveSubjects();
@@ -1018,16 +1032,21 @@
         showToast('↺ Demo dataset restored');
       }
     });
-    if (exportBtn) exportBtn.addEventListener('click', exportStudyPlanJSON);
-    if (syncCloudBtn) syncCloudBtn.addEventListener('click', () => {
-      saveSubjects();
-      showToast('☁️ Synced to Google Cloud Firestore');
+    if (exportBtn) exportBtn.addEventListener('click', () => {
+      const a = Object.assign(document.createElement('a'), {
+        href: 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState.subjects, null, 2)),
+        download: 'focusmatrix_gate_study_plan.json'
+      });
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('📥 Study Plan Exported as JSON');
     });
 
-    // Practice Module — Subject Tabs
-    document.querySelectorAll('#practiceSubjectTabs .tab-btn').forEach(tab => {
+    // Practice Module
+    document.querySelectorAll('#practiceSubjectTabs .sub-tab-btn').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('#practiceSubjectTabs .tab-btn').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#practiceSubjectTabs .sub-tab-btn').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         appState.practice.activeSubject = tab.getAttribute('data-subject');
         appState.practice.selectedTopic = null;
@@ -1035,7 +1054,6 @@
       });
     });
 
-    // Practice — Weak Topic Chips (delegated)
     const chipsContainer = document.getElementById('weakTopicsChipContainer');
     if (chipsContainer) {
       chipsContainer.addEventListener('click', e => {
@@ -1048,41 +1066,70 @@
       });
     }
 
-    // Practice — Difficulty Filters
-    document.querySelectorAll('.diff-filter .diff-btn').forEach(df => {
+    document.querySelectorAll('.diff-btn-group .diff-chip').forEach(df => {
       df.addEventListener('click', () => {
-        document.querySelectorAll('.diff-filter .diff-btn').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.diff-btn-group .diff-chip').forEach(d => d.classList.remove('active'));
         df.classList.add('active');
         appState.practice.activeDifficulty = df.getAttribute('data-diff');
         renderPractice();
       });
     });
 
-    // Practice — Question Actions (delegated)
     const qContainer = document.getElementById('questionListContainer');
     if (qContainer) {
       qContainer.addEventListener('click', e => {
         const optBtn = e.target.closest('.q-option-btn');
         if (optBtn) {
-          handleChoiceClick(optBtn.getAttribute('data-qid'), optBtn.getAttribute('data-optindex'));
+          const qid = optBtn.getAttribute('data-qid');
+          appState.practice.answers[qid] = parseInt(optBtn.getAttribute('data-optindex'), 10);
+          renderPractice();
           return;
         }
 
         const checkBtn = e.target.closest('[data-action="check-answer"]');
         if (checkBtn) {
-          handleCheckAnswer(checkBtn.getAttribute('data-qid'));
+          const qid = checkBtn.getAttribute('data-qid');
+          if (appState.practice.answers[qid] === undefined) {
+            showToast('⚠️ Please choose an option first.', 'warning');
+            return;
+          }
+          const materialsRepo = (typeof GATE_MATERIALS !== 'undefined') ? GATE_MATERIALS : {};
+          let questionObj = null;
+          Object.values(materialsRepo).forEach(s => {
+            const found = s.questions.find(q => q.id === qid);
+            if (found) questionObj = found;
+          });
+          if (questionObj) {
+            const isCorrect = appState.practice.answers[qid] === questionObj.correctIndex;
+            if (isCorrect) {
+              appState.practice.solvedQuestions.add(qid);
+              showToast('🎉 Correct! Excellent mastery.');
+            } else {
+              appState.practice.openSolutions.add(qid);
+              showToast('❌ Incorrect. Step-by-step derivation opened.', 'warning');
+            }
+            renderPractice();
+          }
           return;
         }
 
         const solBtn = e.target.closest('[data-action="toggle-solution"]');
         if (solBtn) {
-          handleToggleSolution(solBtn.getAttribute('data-qid'));
-          return;
+          const qid = solBtn.getAttribute('data-qid');
+          if (appState.practice.openSolutions.has(qid)) {
+            appState.practice.openSolutions.delete(qid);
+          } else {
+            appState.practice.openSolutions.add(qid);
+            showToast('📖 Solution revealed!');
+          }
+          renderPractice();
         }
       });
     }
 
-    // AI Assistant Chat
+    // AI & Vision
+    setupVisionAndAI();
+
     const chatSendBtn = document.getElementById('chatSendBtn');
     const chatInput = document.getElementById('chatInput');
     if (chatSendBtn) chatSendBtn.addEventListener('click', handleChatSend);
@@ -1094,6 +1141,7 @@
         }
       });
     }
+
     document.querySelectorAll('.suggest-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         if (chatInput) {
@@ -1104,9 +1152,6 @@
     });
   }
 
-  // -------------------------------------------------------------------------
-  // 13. Bootstrap
-  // -------------------------------------------------------------------------
   function init() {
     initTheme();
     updateLiveCalculatorResults();

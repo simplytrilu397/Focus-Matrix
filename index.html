@@ -3,49 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>FocusMatrix — Adaptive GATE Exam Study Engine on Google Cloud</title>
-  <meta name="description" content="Adaptive GATE & semester study planner powered by Subject Priority Index (SPI), Google Cloud Run, and Cloud Firestore.">
+  <title>FocusMatrix — Adaptive GATE Engineering Intelligence System</title>
+  <meta name="description" content="Professional GATE CS and Engineering exam optimization cockpit. SPI mathematical engine, multimodal diagram solver, and Cloud Firestore sync.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
 
-  <!-- App Shell -->
   <div class="app-shell" id="appShell">
 
-    <!-- ======================== TOP HEADER ======================== -->
+    <!-- ======================== COCKPIT HEADER ======================== -->
     <header class="app-header">
       <div class="header-inner">
         <div class="brand">
           <div class="brand-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="2" x2="12" y2="12"></line>
-              <line x1="12" y1="12" x2="18.5" y2="8.5"></line>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
             </svg>
           </div>
           <div class="brand-text-col">
             <span class="brand-name">FocusMatrix</span>
-            <span class="brand-badge">Google Cloud Run</span>
+            <span class="brand-sub">GATE Exam Cockpit</span>
           </div>
         </div>
 
-        <!-- Desktop Tab Navigation -->
+        <!-- Desktop Navigation Bar -->
         <nav class="desktop-nav" aria-label="Main navigation">
-          <button class="nav-tab active" data-tab="home" aria-selected="true">🏠 Home</button>
-          <button class="nav-tab" data-tab="calculator" aria-selected="false">⚡ Calculator</button>
-          <button class="nav-tab" data-tab="subjects" aria-selected="false">📋 My Subjects</button>
-          <button class="nav-tab" data-tab="practice" aria-selected="false">🧠 GATE Materials</button>
-          <button class="nav-tab" data-tab="assistant" aria-selected="false">💬 AI Coach</button>
+          <button class="nav-tab active" data-tab="home" aria-selected="true">
+            <span class="nav-ico">⚡</span> Focus Hub
+          </button>
+          <button class="nav-tab" data-tab="calculator" aria-selected="false">
+            <span class="nav-ico">📐</span> SPI Engine
+          </button>
+          <button class="nav-tab" data-tab="subjects" aria-selected="false">
+            <span class="nav-ico">📊</span> Priority Matrix
+          </button>
+          <button class="nav-tab" data-tab="practice" aria-selected="false">
+            <span class="nav-ico">🧠</span> GATE Syllabus & PYQs
+          </button>
+          <button class="nav-tab" data-tab="assistant" aria-selected="false">
+            <span class="nav-ico">📸</span> Visual AI Coach
+          </button>
         </nav>
 
-        <!-- Right Header Actions (Cloud Sync & Theme) -->
+        <!-- Right Header Status & Controls -->
         <div class="header-actions">
-          <div class="cloud-sync-pill" id="cloudSyncPill" title="Cloud Firestore Real-time Status">
+          <div class="cloud-sync-pill" id="cloudSyncPill" title="Cloud Engine Status">
             <span class="sync-dot"></span>
-            <span class="sync-text" id="syncStatusText">Cloud Live</span>
+            <span class="sync-text" id="syncStatusText">Cloud Ready</span>
           </div>
 
           <button class="theme-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark">
@@ -56,389 +65,455 @@
       </div>
     </header>
 
-    <!-- ======================== TAB PANELS ======================== -->
+    <!-- ======================== MAIN WORKSPACE ======================== -->
     <main class="main-content" id="mainContent">
 
-      <!-- ── TAB: HOME ── -->
-      <section class="tab-panel active" id="panel-home" data-tab="home" aria-label="Home">
-        <!-- Today's Focus -->
-        <div class="panel-top">
-          <div class="focus-hero" id="focusHero">
-            <div class="focus-hero-meta">
-              <span class="subject-chip" id="focusSubjectBadge">Engineering Mathematics</span>
-              <span class="streak-badge" id="streakBadge">🔥 7-Day Streak</span>
-              <span class="cloud-tag" id="focusCloudTag">☁️ Cloud Firestore Active</span>
+      <!-- ── SECTION 1: FOCUS HUB (HOME) ── -->
+      <section class="tab-panel active" id="panel-home" data-tab="home" aria-label="Focus Hub">
+        
+        <!-- Top Workspace Overview -->
+        <div class="hub-hero">
+          <div class="hero-left">
+            <div class="hero-meta-row">
+              <span class="meta-tag tag-subject" id="focusSubjectBadge">Engineering Mathematics</span>
+              <span class="meta-tag tag-tier score-crit" id="focusTierBadge">CRITICAL PRIORITY</span>
+              <span class="meta-tag tag-streak">🔥 7-Day Sprint Streak</span>
             </div>
-            <h2 class="focus-hero-title" id="focusTopicTitle">Calculus — Integration by Parts & Definite Integrals</h2>
-            <p class="focus-hero-reason" id="focusTopicReason">Highest combined GATE exam weight and critical difficulty gap.</p>
-            <div class="focus-stats-row">
-              <div class="focus-stat">
-                <span class="stat-label">SPI Score</span>
-                <span class="stat-value score-crit" id="focusTopicScore">92 / 100</span>
+            <h2 class="hero-title" id="focusTopicTitle">Calculus — Integration by Parts & Definite Integrals</h2>
+            <p class="hero-desc" id="focusTopicReason">Highest combined GATE exam weightage (25%) and critical difficulty gap (8.5/10).</p>
+            
+            <div class="hero-metrics-grid">
+              <div class="metric-card">
+                <span class="metric-lbl">Priority SPI</span>
+                <span class="metric-val text-crit" id="focusTopicScore">92<small>/100</small></span>
               </div>
-              <div class="focus-stat">
-                <span class="stat-label">Exam Runway</span>
-                <span class="stat-value" id="focusTopicDays">4 Days</span>
+              <div class="metric-card">
+                <span class="metric-lbl">Runway Window</span>
+                <span class="metric-val" id="focusTopicDays">4 Days</span>
               </div>
-              <div class="focus-stat">
-                <span class="stat-label">Sprint Block</span>
-                <span class="stat-value" id="focusTopicHours">3.5 hrs</span>
+              <div class="metric-card">
+                <span class="metric-lbl">Allocated Block</span>
+                <span class="metric-val" id="focusTopicHours">3.5 hrs</span>
               </div>
             </div>
-            <div class="focus-hero-actions">
-              <button class="btn-primary" id="btnMarkFocusDone">✓ Mark Complete</button>
-              <button class="btn-ghost" id="btnNextFocusTopic">⇄ Shuffle Focus</button>
+
+            <div class="hero-btn-row">
+              <button class="btn-action primary" id="btnMarkFocusDone">✓ Complete Topic</button>
+              <button class="btn-action secondary" id="btnNextFocusTopic">⇄ Shuffle Focus</button>
+              <button class="btn-action outline" onclick="switchTab('practice')">🧠 Open PYQs</button>
+            </div>
+          </div>
+
+          <!-- Pomodoro Deep Sprint Module -->
+          <div class="hero-right">
+            <div class="sprint-card">
+              <div class="sprint-header">
+                <span class="sprint-badge">⚡ Deep Work Sprint</span>
+                <span class="sprint-sub">25-Min Interval</span>
+              </div>
+              <div class="sprint-clock" id="timerDisplay">25:00</div>
+              <div class="sprint-controls">
+                <button class="btn-sprint" id="btnTimerToggle">
+                  <span id="timerBtnText">▶ Start Deep Sprint</span>
+                </button>
+                <button class="btn-sprint-reset" id="btnTimerReset" title="Reset Timer">↺</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Pomodoro Timer -->
-        <div class="card">
-          <div class="card-header-row">
-            <h3 class="card-heading">⚡ Focus Sprint</h3>
-            <span class="muted-label">25-Min Pomodoro</span>
+        <!-- Structured Progress & Summary HUD -->
+        <div class="overview-grid">
+          <div class="overview-card">
+            <div class="card-head">
+              <h4>🎯 Daily Syllabus Progress</h4>
+              <span class="muted-mono" id="dailyProgressText">2 / 5 Topics</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="dailyProgressBar" style="width: 40%;"></div>
+            </div>
           </div>
-          <div class="timer-display" id="timerDisplay">25:00</div>
-          <div class="timer-btns">
-            <button class="btn-primary" id="btnTimerToggle">
-              <span id="timerBtnText">▶ Start Sprint</span>
-            </button>
-            <button class="btn-ghost" id="btnTimerReset">↺ Reset</button>
+
+          <div class="overview-card">
+            <div class="card-head">
+              <h4>📚 GATE CS Subject Matrix</h4>
+              <span class="muted-mono">6 Core Modules</span>
+            </div>
+            <div class="subject-quick-strip">
+              <span class="strip-pill" onclick="switchTab('practice')">📐 Maths</span>
+              <span class="strip-pill" onclick="switchTab('practice')">💻 DSA</span>
+              <span class="strip-pill" onclick="switchTab('practice')">⚡ OS</span>
+              <span class="strip-pill" onclick="switchTab('practice')">🗄️ DBMS</span>
+              <span class="strip-pill" onclick="switchTab('practice')">🌐 Networks</span>
+              <span class="strip-pill" onclick="switchTab('practice')">🧠 Aptitude</span>
+            </div>
           </div>
         </div>
 
-        <!-- Daily Progress -->
-        <div class="card">
-          <div class="card-header-row">
-            <h3 class="card-heading">🎯 Daily Progress</h3>
-            <span class="muted-label" id="dailyProgressText">2 of 5 Done</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="dailyProgressBar" style="width: 40%;"></div>
-          </div>
-        </div>
       </section>
 
-      <!-- ── TAB: CALCULATOR ── -->
-      <section class="tab-panel" id="panel-calculator" data-tab="calculator" aria-label="Calculator" hidden>
-        <!-- Live Results -->
-        <div class="card results-card" id="resultsSection">
-          <div class="card-header-row">
-            <h3 class="card-heading">Priority Score</h3>
-            <span class="live-dot"><span class="dot-pulse"></span> Live Engine</span>
+      <!-- ── SECTION 2: SPI ENGINE (CALCULATOR) ── -->
+      <section class="tab-panel" id="panel-calculator" data-tab="calculator" aria-label="SPI Calculator" hidden>
+        
+        <div class="engine-layout">
+          
+          <!-- Left Column: Input Cockpit -->
+          <div class="engine-form-card">
+            <div class="card-head-row">
+              <div>
+                <h3 class="panel-heading">⚡ Subject Priority Index (SPI) Engine</h3>
+                <p class="panel-subtitle">Dynamic formula balancing concept gap, paper weight, and days left.</p>
+              </div>
+              <div class="preset-badge-group">
+                <button class="btn-preset panic" id="presetPanic">🚨 Panic</button>
+                <button class="btn-preset balanced" id="presetBalanced">⚖️ Balanced</button>
+                <button class="btn-preset highyield" id="presetHighYield">💎 High Yield</button>
+              </div>
+            </div>
+
+            <form id="spiCalculatorForm" onsubmit="return false;" class="clean-form">
+              
+              <div class="form-row-2">
+                <div class="field-block">
+                  <label class="field-label" for="subjectSelect">GATE Subject Domain</label>
+                  <select id="subjectSelect" class="input-select">
+                    <option value="Engineering Mathematics">📐 Engineering Mathematics</option>
+                    <option value="Data Structures & Algorithms">💻 Data Structures & Algorithms</option>
+                    <option value="Operating Systems">⚡ Operating Systems</option>
+                    <option value="Database Management Systems">🗄️ Database Management Systems</option>
+                    <option value="Computer Networks">🌐 Computer Networks</option>
+                    <option value="General Aptitude">🧠 General Aptitude</option>
+                    <option value="Discrete Mathematics">🔢 Discrete Mathematics</option>
+                  </select>
+                </div>
+
+                <div class="field-block">
+                  <label class="field-label" for="topicNameInput">Target Topic Name</label>
+                  <input type="text" id="topicNameInput" class="input-text" placeholder="e.g. Calculus — Integration by Parts" value="Linear Algebra — Eigenvalues">
+                </div>
+              </div>
+
+              <!-- Interactive Diagnostic Sliders -->
+              <div class="slider-box">
+                <div class="slider-label-row">
+                  <span class="s-label">Concept Weakness / Difficulty</span>
+                  <span class="s-badge" id="weaknessValBadge">8 / 10</span>
+                </div>
+                <input type="range" id="weaknessSlider" class="range-slider" min="1" max="10" step="0.5" value="8">
+                <div class="slider-marks"><span>Mastered (1)</span><span>Moderate (5)</span><span>Severe Gap (10)</span></div>
+              </div>
+
+              <div class="slider-box">
+                <div class="slider-label-row">
+                  <span class="s-label">GATE Exam Weightage</span>
+                  <span class="s-badge" id="weightageValBadge">25%</span>
+                </div>
+                <input type="range" id="weightageSlider" class="range-slider" min="5" max="40" step="1" value="25">
+                <div class="slider-marks"><span>Low Yield (5%)</span><span>Standard (20%)</span><span>Critical Yield (40%)</span></div>
+              </div>
+
+              <div class="slider-box">
+                <div class="slider-label-row">
+                  <span class="s-label">Exam Runway (Days Left)</span>
+                  <span class="s-badge" id="urgencyValBadge">5 Days</span>
+                </div>
+                <input type="range" id="urgencySlider" class="range-slider" min="1" max="30" step="1" value="5">
+                <div class="slider-marks"><span>1 Day (Panic)</span><span>15 Days</span><span>30 Days (Runway)</span></div>
+              </div>
+
+              <div class="slider-box">
+                <div class="slider-label-row">
+                  <span class="s-label">Sprint Time Needed</span>
+                  <span class="s-badge" id="hoursValBadge">3.0 hrs</span>
+                </div>
+                <input type="range" id="hoursSlider" class="range-slider" min="0.5" max="10" step="0.5" value="3.0">
+                <div class="slider-marks"><span>0.5 hr</span><span>5 hrs</span><span>10 hrs</span></div>
+              </div>
+
+              <div class="form-btn-row">
+                <button type="button" class="btn-action primary full-w" id="btnCalculateAndAdd">
+                  ⚡ Add to Priority Index
+                </button>
+                <button type="button" class="btn-action ghost" id="btnResetForm">↺ Clear</button>
+              </div>
+
+            </form>
           </div>
-          <div class="score-row">
-            <div class="gauge-wrap">
-              <svg class="gauge-svg" viewBox="0 0 160 160" width="120" height="120">
-                <circle class="gauge-bg-ring" cx="80" cy="80" r="64" stroke-width="14" fill="none"/>
-                <circle class="gauge-fill-ring" id="gaugeCircle" cx="80" cy="80" r="64" stroke-width="14" fill="none" stroke-dasharray="402.12" stroke-dashoffset="56.29"/>
+
+          <!-- Right Column: Live Radial Engine & Diagnostics -->
+          <div class="engine-output-card">
+            <div class="output-header">
+              <span class="live-pulse-tag"><span class="pulse-dot"></span> Live Engine</span>
+              <span class="output-sub">Mathematical SPI Output</span>
+            </div>
+
+            <div class="gauge-center-wrap">
+              <svg class="gauge-svg" viewBox="0 0 160 160" width="130" height="130">
+                <circle class="gauge-bg-ring" cx="80" cy="80" r="64" stroke-width="12" fill="none"/>
+                <circle class="gauge-fill-ring" id="gaugeCircle" cx="80" cy="80" r="64" stroke-width="12" fill="none" stroke-dasharray="402.12" stroke-dashoffset="56.29"/>
               </svg>
-              <div class="gauge-label">
-                <span class="gauge-num" id="resultScoreNum">88</span>
-                <span class="gauge-sub">/ 100</span>
+              <div class="gauge-center-text">
+                <span class="gauge-number" id="resultScoreNum">88</span>
+                <span class="gauge-max">/ 100</span>
               </div>
             </div>
-            <div class="score-details">
-              <div class="tier-badge tier-critical" id="resultTierBadge">
-                <span class="tier-text" id="resultTierText">CRITICAL</span>
+
+            <div class="output-tier-row">
+              <span class="tier-pill tier-critical" id="resultTierBadge">
+                <span id="resultTierText">CRITICAL PRIORITY</span>
+              </span>
+            </div>
+
+            <h4 class="output-topic-title" id="resultTopicHeading">Linear Algebra — Eigenvalues</h4>
+            <p class="output-summary" id="resultSummaryText">High exam impact combined with severe difficulty gap. Immediate focus required.</p>
+
+            <!-- Breakdown Bars -->
+            <div class="breakdown-stack">
+              <div class="b-item">
+                <div class="b-meta"><span>Weakness (35%)</span><span id="breakdownWeaknessScore">28 / 35</span></div>
+                <div class="b-bar"><div class="b-fill weak" id="barFillWeakness" style="width: 80%"></div></div>
               </div>
-              <p class="result-topic-name" id="resultTopicHeading">Electromagnetic Induction</p>
-              <p class="result-summary" id="resultSummaryText">High exam impact. Immediate attention needed.</p>
+              <div class="b-item">
+                <div class="b-meta"><span>Weightage (35%)</span><span id="breakdownWeightScore">21 / 35</span></div>
+                <div class="b-bar"><div class="b-fill weight" id="barFillWeight" style="width: 62%"></div></div>
+              </div>
+              <div class="b-item">
+                <div class="b-meta"><span>Urgency (30%)</span><span id="breakdownUrgencyScore">25 / 30</span></div>
+                <div class="b-bar"><div class="b-fill urgency" id="barFillUrgency" style="width: 83%"></div></div>
+              </div>
+            </div>
+
+            <div class="strategy-callout">
+              <span class="strat-icon">💡</span>
+              <div>
+                <strong id="recTitle">Critical Strategy:</strong>
+                <p id="recDescription">Schedule 2 deep-focus blocks (90 min each). Solve 10 PYQs and draft a formula cheat sheet.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Breakdown Bars -->
-          <div class="breakdown-grid">
-            <div class="breakdown-row">
-              <span class="b-label">Weakness</span>
-              <div class="b-track"><div class="b-fill b-fill-weak" id="barFillWeakness" style="width:80%"></div></div>
-              <span class="b-score" id="breakdownWeaknessScore">28 / 35</span>
-            </div>
-            <div class="breakdown-row">
-              <span class="b-label">Weightage</span>
-              <div class="b-track"><div class="b-fill b-fill-weight" id="barFillWeight" style="width:62%"></div></div>
-              <span class="b-score" id="breakdownWeightScore">21 / 35</span>
-            </div>
-            <div class="breakdown-row">
-              <span class="b-label">Urgency</span>
-              <div class="b-track"><div class="b-fill b-fill-urgency" id="barFillUrgency" style="width:83%"></div></div>
-              <span class="b-score" id="breakdownUrgencyScore">25 / 30</span>
-            </div>
-          </div>
-
-          <!-- Recommendation -->
-          <div class="rec-box" id="recommendationCard">
-            <span class="rec-icon">💡</span>
-            <div>
-              <div class="rec-title" id="recTitle">Critical Priority Strategy</div>
-              <p class="rec-desc" id="recDescription">Schedule 2 deep-focus blocks (90 min each). Solve 10 PYQs and draft a formula cheat sheet.</p>
-            </div>
-          </div>
         </div>
 
-        <!-- Calculator Form -->
-        <div class="card">
-          <div class="card-header-row">
-            <h3 class="card-heading">⚡ SPI Calculator</h3>
-            <div class="preset-chips" role="group" aria-label="Quick presets">
-              <button class="chip-sm" id="presetPanic">🚨 Panic</button>
-              <button class="chip-sm" id="presetBalanced">⚖️ Balanced</button>
-              <button class="chip-sm" id="presetHighYield">💎 High Yield</button>
-            </div>
-          </div>
-
-          <form id="spiCalculatorForm" onsubmit="return false;">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="subjectSelect" class="form-label">Subject</label>
-                <select id="subjectSelect" class="form-control">
-                  <option value="Engineering Mathematics">📐 Engineering Mathematics</option>
-                  <option value="Data Structures & Algorithms">💻 Data Structures & Algorithms</option>
-                  <option value="Operating Systems">⚡ Operating Systems</option>
-                  <option value="Database Management Systems">🗄️ Database Management Systems</option>
-                  <option value="Computer Networks">🌐 Computer Networks</option>
-                  <option value="General Aptitude">🧠 General Aptitude</option>
-                  <option value="Discrete Mathematics">🔢 Discrete Mathematics</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="topicNameInput" class="form-label">Topic Name</label>
-                <input type="text" id="topicNameInput" class="form-control" placeholder="e.g. Eigenvalues & Cayley-Hamilton" value="Linear Algebra — Eigenvalues">
-              </div>
-            </div>
-
-            <!-- Sliders -->
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="weaknessSlider" class="form-label">Difficulty / Concept Gap</label>
-                <span class="slider-val" id="weaknessValBadge">8 / 10</span>
-              </div>
-              <input type="range" id="weaknessSlider" class="slider" min="1" max="10" step="0.5" value="8">
-              <div class="slider-ticks"><span>Easy (1)</span><span>Hard (10)</span></div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="weightageSlider" class="form-label">GATE Exam Weightage</label>
-                <span class="slider-val" id="weightageValBadge">25%</span>
-              </div>
-              <input type="range" id="weightageSlider" class="slider" min="5" max="40" step="1" value="25">
-              <div class="slider-ticks"><span>5%</span><span>40%</span></div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="urgencySlider" class="form-label">Days Until Exam</label>
-                <span class="slider-val" id="urgencyValBadge">5 Days</span>
-              </div>
-              <input type="range" id="urgencySlider" class="slider" min="1" max="30" step="1" value="5">
-              <div class="slider-ticks"><span>1 Day</span><span>30 Days</span></div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="hoursSlider" class="form-label">Hours Needed</label>
-                <span class="slider-val" id="hoursValBadge">3.0 hrs</span>
-              </div>
-              <input type="range" id="hoursSlider" class="slider" min="0.5" max="10" step="0.5" value="3.0">
-              <div class="slider-ticks"><span>0.5 hr</span><span>10 hrs</span></div>
-            </div>
-
-            <!-- Confidence -->
-            <div class="form-group">
-              <label class="form-label">Current Mastery</label>
-              <div class="radio-group" role="radiogroup">
-                <label class="radio-pill">
-                  <input type="radio" name="confidenceLevel" value="low" checked>
-                  <span>🔴 Low</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="confidenceLevel" value="medium">
-                  <span>🟡 Medium</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="confidenceLevel" value="high">
-                  <span>🟢 High</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn-primary" id="btnCalculateAndAdd">
-                ⚡ Add to Priority Index
-              </button>
-              <button type="button" class="btn-ghost" id="btnResetForm">↺ Clear</button>
-            </div>
-          </form>
-        </div>
       </section>
 
-      <!-- ── TAB: MY SUBJECTS ── -->
-      <section class="tab-panel" id="panel-subjects" data-tab="subjects" aria-label="My Subjects" hidden>
-        <div class="card">
-          <div class="card-header-row">
+      <!-- ── SECTION 3: PRIORITY MATRIX (MY SUBJECTS) ── -->
+      <section class="tab-panel" id="panel-subjects" data-tab="subjects" aria-label="Priority Matrix" hidden>
+        
+        <div class="matrix-container">
+          
+          <div class="matrix-top-bar">
             <div>
-              <h3 class="card-heading">📋 Priority Index</h3>
-              <span class="muted-label" id="cloudStorageStatus">☁️ Cloud Firestore Connected</span>
+              <h3 class="panel-heading">📋 Priority Masterboard</h3>
+              <p class="panel-subtitle">Sorted by Subject Priority Index (SPI) score and exam urgency.</p>
             </div>
-            <span class="count-pill"><span id="totalSubjectsCount">5</span> Topics</span>
+            <div class="matrix-stats-pills">
+              <span class="count-tag"><strong id="totalSubjectsCount">5</strong> Tracked Topics</span>
+            </div>
           </div>
 
-          <!-- Search -->
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="indexSearchInput" class="search-input" placeholder="Search GATE topics...">
-            <button class="clear-btn" id="btnClearSearch" aria-label="Clear search">✕</button>
+          <!-- Filter & Search Cockpit -->
+          <div class="matrix-toolbar">
+            <div class="search-input-wrap">
+              <span class="s-icon">🔍</span>
+              <input type="text" id="indexSearchInput" class="search-field" placeholder="Filter by topic or subject...">
+              <button class="clear-btn" id="btnClearSearch">✕</button>
+            </div>
+
+            <div class="filter-chips-row">
+              <button class="filter-btn active" data-filter="all" id="filterAll">All (<span id="countAll">5</span>)</button>
+              <button class="filter-btn crit" data-filter="critical" id="filterCrit">🔴 Critical (<span id="countCrit">2</span>)</button>
+              <button class="filter-btn high" data-filter="high" id="filterHigh">🟠 High (<span id="countHigh">2</span>)</button>
+              <button class="filter-btn med" data-filter="medium" id="filterMed">🔵 Moderate (<span id="countMed">1</span>)</button>
+              <button class="filter-btn done" data-filter="completed" id="filterDone">✓ Done (<span id="countDone">0</span>)</button>
+            </div>
+
+            <div class="sort-select-wrap">
+              <select id="indexSortSelect" class="sort-dropdown">
+                <option value="spi_desc">Highest Priority (SPI)</option>
+                <option value="spi_asc">Lowest Priority</option>
+                <option value="days_asc">Closest Runway</option>
+                <option value="weakness_desc">Hardest Difficulty</option>
+                <option value="weight_desc">Highest Exam Weight</option>
+              </select>
+            </div>
           </div>
 
-          <!-- Filter chips -->
-          <div class="filter-row" role="group" aria-label="Filter by tier">
-            <button class="filter-chip active" data-filter="all" id="filterAll">All <span id="countAll">5</span></button>
-            <button class="filter-chip chip-crit" data-filter="critical" id="filterCrit">🔴 Critical <span id="countCrit">2</span></button>
-            <button class="filter-chip chip-high" data-filter="high" id="filterHigh">🟠 High <span id="countHigh">2</span></button>
-            <button class="filter-chip chip-med" data-filter="medium" id="filterMed">🔵 Moderate <span id="countMed">1</span></button>
-            <button class="filter-chip chip-done" data-filter="completed" id="filterDone">✓ Done <span id="countDone">0</span></button>
-          </div>
-
-          <!-- Sort -->
-          <div class="sort-row">
-            <label for="indexSortSelect" class="muted-label">Sort by:</label>
-            <select id="indexSortSelect" class="sort-select">
-              <option value="spi_desc">Highest Priority (SPI)</option>
-              <option value="spi_asc">Lowest Priority</option>
-              <option value="days_asc">Closest Exam Runway</option>
-              <option value="weakness_desc">Hardest Difficulty First</option>
-              <option value="weight_desc">Highest Exam Weightage</option>
-            </select>
-          </div>
-
-          <!-- Distribution bar -->
+          <!-- Priority Distribution Bar -->
           <div class="dist-bar" aria-label="Priority distribution">
-            <div class="dist-seg dist-crit" id="distCritSeg" style="width: 40%" title="Critical"></div>
-            <div class="dist-seg dist-high" id="distHighSeg" style="width: 40%" title="High"></div>
-            <div class="dist-seg dist-med" id="distMedSeg" style="width: 20%" title="Moderate"></div>
+            <div class="dist-seg dist-crit" id="distCritSeg" style="width: 40%"></div>
+            <div class="dist-seg dist-high" id="distHighSeg" style="width: 40%"></div>
+            <div class="dist-seg dist-med" id="distMedSeg" style="width: 20%"></div>
           </div>
 
-          <!-- Subject card list -->
-          <div class="subject-list" id="subjectCardList" role="list" aria-label="Prioritized subjects"></div>
+          <!-- Cards Grid -->
+          <div class="subject-card-grid" id="subjectCardList" role="list"></div>
 
-          <!-- Bottom actions -->
-          <div class="card-bottom-actions">
-            <button class="btn-ghost" id="btnSyncCloud">☁️ Sync to Firestore</button>
-            <button class="btn-ghost" id="btnResetToDefaults">↺ Reset Defaults</button>
-            <button class="btn-ghost" id="btnExportJSON">📥 Export JSON</button>
+          <!-- Bottom Management Bar -->
+          <div class="matrix-footer">
+            <button class="btn-action ghost sm" id="btnSyncCloud">☁️ Sync Cloud Firestore</button>
+            <button class="btn-action ghost sm" id="btnResetToDefaults">↺ Reset Defaults</button>
+            <button class="btn-action ghost sm" id="btnExportJSON">📥 Export Study Plan (JSON)</button>
           </div>
+
         </div>
+
       </section>
 
-      <!-- ── TAB: PRACTICE & GATE MATERIALS ── -->
-      <section class="tab-panel" id="panel-practice" data-tab="practice" aria-label="GATE Materials & Practice" hidden>
-        <div class="card">
-          <div class="card-header-row">
-            <div>
-              <h3 class="card-heading">🧠 GATE Materials & PYQ Solver</h3>
-              <span class="muted-label" id="gateSyllabusBadge">Official GATE CS Curriculum</span>
+      <!-- ── SECTION 4: GATE SYLLABUS & PYQ SOLVER ── -->
+      <section class="tab-panel" id="panel-practice" data-tab="practice" aria-label="GATE Materials" hidden>
+        
+        <div class="practice-hub">
+          
+          <!-- Subject Navigation Tabs -->
+          <div class="subject-switcher" id="practiceSubjectTabs" role="tablist">
+            <button class="sub-tab-btn active" data-subject="gate_eng_maths">📐 Engg Mathematics</button>
+            <button class="sub-tab-btn" data-subject="gate_dsa">💻 DSA</button>
+            <button class="sub-tab-btn" data-subject="gate_os">⚡ Operating Systems</button>
+            <button class="sub-tab-btn" data-subject="gate_dbms">🗄️ DBMS</button>
+            <button class="sub-tab-btn" data-subject="gate_cn">🌐 Computer Networks</button>
+            <button class="sub-tab-btn" data-subject="gate_aptitude">🧠 General Aptitude</button>
+          </div>
+
+          <!-- Cheat Sheet / Formula Drawer -->
+          <div class="formula-drawer" id="cheatSheetContainer"></div>
+
+          <!-- Sub-topic Selector & Filter -->
+          <div class="practice-filter-row">
+            <div class="topic-chip-scroll" id="weakTopicsChipContainer"></div>
+            <div class="diff-btn-group">
+              <button class="diff-chip active" data-diff="all">All</button>
+              <button class="diff-chip" data-diff="Easy">Easy</button>
+              <button class="diff-chip" data-diff="Medium">Medium</button>
+              <button class="diff-chip" data-diff="Hard">Hard (GATE Level)</button>
             </div>
-            <span class="count-pill" id="practiceSolvedCount">0 / 2 Solved</span>
           </div>
 
-          <!-- Subject tabs -->
-          <div class="subject-tabs" id="practiceSubjectTabs" role="tablist" aria-label="GATE Subject tabs">
-            <button class="tab-btn active" data-subject="gate_eng_maths">📐 Engg Maths</button>
-            <button class="tab-btn" data-subject="gate_dsa">💻 DSA</button>
-            <button class="tab-btn" data-subject="gate_os">⚡ OS</button>
-            <button class="tab-btn" data-subject="gate_dbms">🗄️ DBMS</button>
-            <button class="tab-btn" data-subject="gate_cn">🌐 Networks</button>
-            <button class="tab-btn" data-subject="gate_aptitude">🧠 Aptitude</button>
+          <!-- Question Stream Header -->
+          <div class="stream-header">
+            <h4 class="stream-title" id="practiceQuestionFeedTitle">Diagnostic Questions</h4>
+            <span class="stream-count" id="practiceSolvedCount">0 / 2 Solved</span>
           </div>
 
-          <!-- Quick Formulas & Cheat Sheets Drawer -->
-          <div class="cheat-sheet-box" id="cheatSheetContainer"></div>
+          <!-- Question Cards List -->
+          <div class="questions-stream" id="questionListContainer" role="list"></div>
 
-          <!-- Topic chips -->
-          <div class="topic-chips" id="weakTopicsChipContainer" role="group" aria-label="Select weak topic"></div>
-
-          <!-- Difficulty filter -->
-          <div class="diff-filter" role="group" aria-label="Difficulty filter">
-            <button class="diff-btn active" data-diff="all">All</button>
-            <button class="diff-btn" data-diff="Easy">Easy</button>
-            <button class="diff-btn" data-diff="Medium">Medium</button>
-            <button class="diff-btn" data-diff="Hard">Hard (GATE Level)</button>
-          </div>
-
-          <!-- Question heading -->
-          <h4 class="q-section-title" id="practiceQuestionFeedTitle">Select a topic above to load questions</h4>
-
-          <!-- Questions container -->
-          <div class="questions-list" id="questionListContainer" role="list"></div>
         </div>
+
       </section>
 
-      <!-- ── TAB: AI ASSISTANT ── -->
-      <section class="tab-panel" id="panel-assistant" data-tab="assistant" aria-label="AI Assistant" hidden>
-        <div class="card chat-card">
-          <div class="card-header-row">
-            <h3 class="card-heading">💬 GATE AI Coach</h3>
-            <span class="muted-label">Google Cloud Backend</span>
-          </div>
+      <!-- ── SECTION 5: VISUAL AI COACH & PHOTO SEARCH ── -->
+      <section class="tab-panel" id="panel-assistant" data-tab="assistant" aria-label="Visual AI Coach" hidden>
+        
+        <div class="ai-station-layout">
+          
+          <!-- Left: Multimodal Photo Search & Question Scanner -->
+          <div class="ai-scanner-panel">
+            <div class="panel-header-mini">
+              <span class="panel-tag">📸 Multimodal Vision Scanner</span>
+              <h4>Photo & Diagram Search</h4>
+              <p class="panel-desc">Upload or drop handwritten formulas, circuit diagrams, or PYQ screenshots for step-by-step solutions.</p>
+            </div>
 
-          <!-- Suggested prompts -->
-          <div class="chat-suggestions">
-            <button class="suggest-chip" data-prompt="What should I study today for GATE?">What to study today?</button>
-            <button class="suggest-chip" data-prompt="Which GATE topics are most critical?">Critical topics?</button>
-            <button class="suggest-chip" data-prompt="Give me a study plan for tomorrow">Plan for tomorrow</button>
-            <button class="suggest-chip" data-prompt="How many hours should I study?">How many hours?</button>
-            <button class="suggest-chip" data-prompt="Which topic has the highest exam weight?">Highest weightage?</button>
-          </div>
+            <!-- Drag & Drop Photo Zone -->
+            <div class="photo-dropzone" id="photoDropzone">
+              <input type="file" id="photoFileInput" accept="image/*" class="file-input-hidden">
+              <div class="dropzone-content" id="dropzonePrompt">
+                <span class="dz-icon">📷</span>
+                <span class="dz-title">Drag & Drop question photo or screenshot</span>
+                <span class="dz-sub">Supports PNG, JPG, WEBP (Handwritten notes & diagrams)</span>
+                <button type="button" class="btn-action outline sm" id="btnBrowsePhoto">Choose Image File</button>
+              </div>
 
-          <!-- Chat messages -->
-          <div class="chat-messages" id="chatMessages" aria-live="polite" aria-label="Chat conversation">
-            <div class="chat-msg bot-msg">
-              <div class="msg-avatar">🤖</div>
-              <div class="msg-bubble">
-                <p>Hey! I'm your GATE & Semester AI Coach running on Google Cloud. I analyze your Subject Priority Index (SPI), optimize your study runway, and recommend high-yield topic drills. Ask me anything — like <em>"What should I study today?"</em> or <em>"Which topics are critical?"</em></p>
+              <!-- Image Preview Container (Hidden until image selected) -->
+              <div class="image-preview-box" id="imagePreviewBox" style="display: none;">
+                <img id="previewImageElement" src="" alt="Uploaded Question Preview">
+                <button type="button" class="btn-remove-img" id="btnRemoveImage" title="Remove Photo">✕</button>
               </div>
             </div>
+
+            <!-- Instant One-Click Demo Visual Queries -->
+            <div class="demo-queries-box">
+              <span class="demo-label">⚡ Try Demo Visual Queries:</span>
+              <div class="demo-btn-grid">
+                <button type="button" class="btn-demo" data-demo="integral">📐 Definite Integral (Calculus)</button>
+                <button type="button" class="btn-demo" data-demo="graph">💻 Dijkstra Shortest Path</button>
+                <button type="button" class="btn-demo" data-demo="paging">⚡ TLB Multi-level Paging</button>
+              </div>
+            </div>
+
+            <!-- Exam Quick Knowledge Tags -->
+            <div class="knowledge-chips-wrap">
+              <span class="demo-label">📚 Quick Knowledge Queries:</span>
+              <div class="suggest-chip-list">
+                <button class="suggest-chip" data-prompt="What is the official GATE CS marking scheme and MSQ rule?">GATE Marking Scheme</button>
+                <button class="suggest-chip" data-prompt="Show GATE CS historical cutoffs for General, OBC, and SC/ST">Cutoff Trends</button>
+                <button class="suggest-chip" data-prompt="Which GATE subjects have the highest exam weightage?">Subject Weightage</button>
+                <button class="suggest-chip" data-prompt="What should I study today based on my priority score?">Today's Focus</button>
+                <button class="suggest-chip" data-prompt="Give me a multi-sprint revision plan for tomorrow">Sprint Schedule</button>
+              </div>
+            </div>
+
           </div>
 
-          <!-- Chat Input -->
-          <div class="chat-input-row">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Ask anything about your GATE study plan..." aria-label="Type a message">
-            <button class="btn-primary chat-send-btn" id="chatSendBtn" aria-label="Send message">Send</button>
+          <!-- Right: Interactive Terminal & Solution Stream -->
+          <div class="ai-terminal-panel">
+            <div class="terminal-header">
+              <div class="term-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+              <span class="term-title">GATE Cognitive Assistant Terminal</span>
+              <span class="term-status">● Live Engine</span>
+            </div>
+
+            <div class="terminal-feed" id="chatMessages" aria-live="polite">
+              <div class="chat-msg bot-msg">
+                <div class="msg-avatar">📐</div>
+                <div class="msg-bubble">
+                  <p>Welcome, Engineer! I am your <strong>FocusMatrix GATE AI Coach</strong>. I'm equipped with the complete GATE CSE & Engineering Mathematics syllabus, marking schemes, formula proofs, and multimodal diagram recognition.</p>
+                  <p>Ask any technical question or upload an image above to extract formulas and step-by-step derivations!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terminal Input -->
+            <div class="terminal-input-bar">
+              <input type="text" id="chatInput" class="term-input" placeholder="Type a concept query or upload a diagram above..." aria-label="Type message">
+              <button class="btn-action primary term-send" id="chatSendBtn">Analyze</button>
+            </div>
           </div>
+
         </div>
+
       </section>
 
     </main>
 
-    <!-- ======================== BOTTOM NAV (Mobile) ======================== -->
+    <!-- ======================== MOBILE NAVIGATION ======================== -->
     <nav class="bottom-nav" aria-label="Mobile navigation">
-      <button class="bottom-nav-btn active" data-tab="home" aria-label="Home">
-        <span class="nav-icon">🏠</span>
-        <span class="nav-label">Home</span>
-      </button>
-      <button class="bottom-nav-btn" data-tab="calculator" aria-label="Calculator">
+      <button class="bottom-nav-btn active" data-tab="home">
         <span class="nav-icon">⚡</span>
-        <span class="nav-label">Calculator</span>
+        <span class="nav-label">Focus</span>
       </button>
-      <button class="bottom-nav-btn" data-tab="subjects" aria-label="My Subjects">
-        <span class="nav-icon">📋</span>
-        <span class="nav-label">Subjects</span>
+      <button class="bottom-nav-btn" data-tab="calculator">
+        <span class="nav-icon">📐</span>
+        <span class="nav-label">SPI</span>
       </button>
-      <button class="bottom-nav-btn" data-tab="practice" aria-label="GATE Materials">
+      <button class="bottom-nav-btn" data-tab="subjects">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Matrix</span>
+      </button>
+      <button class="bottom-nav-btn" data-tab="practice">
         <span class="nav-icon">🧠</span>
         <span class="nav-label">GATE</span>
       </button>
-      <button class="bottom-nav-btn" data-tab="assistant" aria-label="AI Assistant">
-        <span class="nav-icon">💬</span>
-        <span class="nav-label">AI</span>
+      <button class="bottom-nav-btn" data-tab="assistant">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Vision AI</span>
       </button>
     </nav>
 
   </div><!-- /app-shell -->
 
-  <!-- Toast container -->
-  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
   <script src="gate-materials.js"></script>
