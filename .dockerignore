@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.vscode
+*.log
+firebase-debug.log
+deploy.bat
+deploy.ps1

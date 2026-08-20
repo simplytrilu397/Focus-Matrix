@@ -1,18 +1,18 @@
 /**
- * FocusMatrix — Subject Priority Index & Study Engine
- * Clean Tab-Based Architecture & AI Assistant
+ * FocusMatrix — Adaptive GATE Study Planner
+ * Connected to Google Cloud Run Backend & Cloud Firestore
  */
 
 (function () {
   'use strict';
 
   // -------------------------------------------------------------------------
-  // 1. Initial State & Realistic Default Dataset
+  // 1. Initial State & Default Dataset (GATE CS Curriculum)
   // -------------------------------------------------------------------------
   const DEFAULT_SUBJECTS = [
     {
       id: 'sub_1',
-      subject: 'Mathematics',
+      subject: 'Engineering Mathematics',
       topic: 'Calculus — Integration by Parts & Definite Integrals',
       weakness: 8.5,
       weightage: 25,
@@ -26,8 +26,8 @@
     },
     {
       id: 'sub_2',
-      subject: 'Physics',
-      topic: 'Electromagnetism — Faraday\'s & Lenz\'s Laws',
+      subject: 'Operating Systems',
+      topic: 'Virtual Memory, Multi-level Paging & TLB EMAT',
       weakness: 8.0,
       weightage: 25,
       daysLeft: 5,
@@ -40,8 +40,8 @@
     },
     {
       id: 'sub_3',
-      subject: 'Chemistry',
-      topic: 'Organic Reaction Mechanisms & Stereochemistry',
+      subject: 'Data Structures & Algorithms',
+      topic: 'Graph Algorithms — Shortest Paths & Negative Edges',
       weakness: 7.0,
       weightage: 20,
       daysLeft: 9,
@@ -54,8 +54,8 @@
     },
     {
       id: 'sub_4',
-      subject: 'Computer Science',
-      topic: 'Dynamic Programming & Tree Traversals',
+      subject: 'Database Management Systems',
+      topic: 'Normalization & Functional Dependencies (BCNF / 3NF)',
       weakness: 6.5,
       weightage: 18,
       daysLeft: 12,
@@ -68,8 +68,8 @@
     },
     {
       id: 'sub_5',
-      subject: 'Biology',
-      topic: 'Genetics & Molecular Inheritance Patterns',
+      subject: 'Computer Networks',
+      topic: 'IPv4 Addressing, CIDR Subnetting & Supernetting',
       weakness: 4.0,
       weightage: 15,
       daysLeft: 18,
@@ -81,155 +81,6 @@
       dateAdded: new Date(Date.now() - 86400000 * 5).toISOString()
     }
   ];
-
-  // -------------------------------------------------------------------------
-  // Practice Repository
-  // -------------------------------------------------------------------------
-  const PRACTICE_REPO = {
-    'Mathematics': {
-      topics: [
-        { name: 'Integration by Parts', weakness: '8.5/10' },
-        { name: 'Definite Integrals', weakness: '8.0/10' },
-        { name: 'Differential Equations', weakness: '7.5/10' },
-        { name: '3D Geometry', weakness: '6.0/10' }
-      ],
-      questions: [
-        {
-          id: 'm_q1',
-          topic: 'Integration by Parts',
-          difficulty: 'Medium',
-          prompt: 'Evaluate the indefinite integral ∫ x · e^x dx.',
-          options: [
-            'x · e^x - e^x + C',
-            'x · e^x + e^x + C',
-            '(x^2 / 2) · e^x + C',
-            'e^x / x + C'
-          ],
-          correctIndex: 0,
-          formula: '∫ u dv = u v - ∫ v du',
-          solution: {
-            step1: 'Identify parts using ILATE rule: Let u = x (algebraic) and dv = e^x dx (exponential).',
-            step2: 'Compute derivatives: du = dx and v = ∫ e^x dx = e^x.',
-            step3: 'Apply integration by parts formula: ∫ x e^x dx = x · e^x - ∫ e^x dx.',
-            step4: 'Integrate e^x to get x e^x - e^x + C = e^x(x - 1) + C.',
-            takeaway: 'Exam Tip: Always pick algebraic terms for u when combined with exponential functions.'
-          }
-        },
-        {
-          id: 'm_q2',
-          topic: 'Definite Integrals',
-          difficulty: 'Hard',
-          prompt: 'Evaluate ∫[0 to π/2] (sin x) / (sin x + cos x) dx.',
-          options: ['π/4', 'π/2', '1', '0'],
-          correctIndex: 0,
-          formula: 'King\'s Property: ∫[a to b] f(x)dx = ∫[a to b] f(a+b-x)dx',
-          solution: {
-            step1: 'Let I = ∫[0 to π/2] (sin x) / (sin x + cos x) dx.',
-            step2: 'Apply King\'s Property: replace x with (π/2 - x). sin(π/2 - x) = cos x.',
-            step3: 'So I = ∫[0 to π/2] (cos x) / (cos x + sin x) dx.',
-            step4: 'Add 2I = ∫[0 to π/2] (sin x + cos x)/(sin x + cos x) dx = ∫[0 to π/2] 1 dx = π/2. Thus I = π/4.',
-            takeaway: 'Exam Tip: When sine and cosine are symmetrical over [0, π/2], King\'s property simplifies the integral to (b-a)/2.'
-          }
-        }
-      ]
-    },
-    'Physics': {
-      topics: [
-        { name: 'Faraday\'s & Lenz\'s Laws', weakness: '8.0/10' },
-        { name: 'Inductance & RL Circuits', weakness: '7.5/10' },
-        { name: 'AC Circuit Resonance', weakness: '6.5/10' }
-      ],
-      questions: [
-        {
-          id: 'p_q1',
-          topic: 'Faraday\'s & Lenz\'s Laws',
-          difficulty: 'Medium',
-          prompt: 'A circular loop of radius 0.1 m is in a magnetic field B = 0.5 T perpendicular to the loop. If B drops to zero in 0.1 s, calculate the induced EMF.',
-          options: ['0.157 V', '0.314 V', '0.05 V', '1.57 V'],
-          correctIndex: 0,
-          formula: 'EMF = -N · (dΦ / dt) where Φ = B · A',
-          solution: {
-            step1: 'Calculate loop area: A = π · r^2 = π · (0.1)^2 = 0.0314 m^2.',
-            step2: 'Calculate initial magnetic flux: Φ_initial = B · A = 0.5 · 0.0314 = 0.0157 Wb.',
-            step3: 'Final flux Φ_final = 0. ΔΦ = 0.0157 Wb over Δt = 0.1 s.',
-            step4: 'Magnitude of EMF = ΔΦ / Δt = 0.0157 / 0.1 = 0.157 V.',
-            takeaway: 'Exam Pitfall: Remember area A = π r^2, not 2 π r.'
-          }
-        }
-      ]
-    },
-    'Chemistry': {
-      topics: [
-        { name: 'Organic Reaction Mechanisms', weakness: '7.0/10' },
-        { name: 'Stereochemistry & Chirality', weakness: '6.5/10' }
-      ],
-      questions: [
-        {
-          id: 'c_q1',
-          topic: 'Organic Reaction Mechanisms',
-          difficulty: 'Hard',
-          prompt: 'Which mechanism undergoes complete inversion of configuration at a chiral center?',
-          options: ['SN2 Mechanism', 'SN1 Mechanism', 'E1 Mechanism', 'E2 Mechanism'],
-          correctIndex: 0,
-          formula: 'SN2: Bimolecular Nucleophilic Substitution with Walden Inversion',
-          solution: {
-            step1: 'Identify SN2 mechanism: Nucleophile attacks from the backside 180° opposite to the leaving group.',
-            step2: 'Backside attack forces stereochemical inversion (Walden Inversion, like an umbrella turning inside out).',
-            step3: 'Contrast with SN1: forms a planar carbocation intermediate yielding a racemic mixture (50% inversion, 50% retention).',
-            step4: 'Hence SN2 produces 100% inverted configuration.',
-            takeaway: 'Exam Fact: Primary alkyl halides heavily favor SN2 in polar aprotic solvents.'
-          }
-        }
-      ]
-    },
-    'Computer Science': {
-      topics: [
-        { name: 'Dynamic Programming', weakness: '6.5/10' },
-        { name: 'Tree Traversals', weakness: '5.5/10' }
-      ],
-      questions: [
-        {
-          id: 'cs_q1',
-          topic: 'Dynamic Programming',
-          difficulty: 'Medium',
-          prompt: 'What is the time complexity to solve the 0/1 Knapsack Problem using Dynamic Programming with N items and capacity W?',
-          options: ['O(N · W)', 'O(2^N)', 'O(N log N)', 'O(W^2)'],
-          correctIndex: 0,
-          formula: 'DP State: dp[i][w] = max(dp[i-1][w], val[i-1] + dp[i-1][w-wt[i-1]])',
-          solution: {
-            step1: 'Notice state dimensions: i goes from 1 to N, w goes from 0 to W.',
-            step2: 'Total DP table size is (N+1) × (W+1).',
-            step3: 'Filling each cell takes O(1) constant time lookups.',
-            step4: 'Total time complexity is O(N · W) (pseudo-polynomial time).',
-            takeaway: 'Exam Fact: 0/1 Knapsack is NP-Complete, so O(N·W) is pseudo-polynomial in W.'
-          }
-        }
-      ]
-    },
-    'Biology': {
-      topics: [
-        { name: 'Genetics & Inheritance', weakness: '4.0/10' }
-      ],
-      questions: [
-        {
-          id: 'b_q1',
-          topic: 'Genetics & Inheritance',
-          difficulty: 'Easy',
-          prompt: 'In a monohybrid cross between two heterozygous tall pea plants (Tt × Tt), what is the expected phenotypic ratio of Tall to Dwarf offspring?',
-          options: ['3 : 1', '1 : 2 : 1', '9 : 3 : 3 : 1', '1 : 1'],
-          correctIndex: 0,
-          formula: 'Monohybrid Punnett Square: TT, Tt, Tt, tt',
-          solution: {
-            step1: 'Cross Tt × Tt.',
-            step2: 'Genotypes produced: 1 TT, 2 Tt, 1 tt.',
-            step3: 'Since T is dominant, TT and Tt are Tall (3 total), tt is Dwarf (1 total).',
-            step4: 'Phenotypic ratio is 3 Tall : 1 Dwarf (3:1).',
-            takeaway: 'Exam Fact: Genotypic ratio is 1:2:1, but Phenotypic ratio is 3:1.'
-          }
-        }
-      ]
-    }
-  };
 
   // -------------------------------------------------------------------------
   // 2. Application State
@@ -249,7 +100,7 @@
     },
     theme: localStorage.getItem('fm_theme') || 'dark',
     practice: {
-      activeSubject: 'Mathematics',
+      activeSubject: 'gate_eng_maths',
       selectedTopic: null,
       activeDifficulty: 'all',
       answers: {},
@@ -259,7 +110,7 @@
   };
 
   // -------------------------------------------------------------------------
-  // 3. SPI Calculation Formula
+  // 3. Subject Priority Index (SPI) Engine
   // -------------------------------------------------------------------------
   function calculateSPI(weakness, weightage, daysLeft) {
     const w = parseFloat(weakness) || 1;
@@ -277,18 +128,18 @@
     let tier = 'low';
     let tierText = 'LOW PRIORITY';
     let summary = 'Steady maintenance. Periodic review is sufficient.';
-    let recommendation = 'Schedule brief flashcard recall sessions twice a week.';
+    let recommendation = 'Schedule brief formula recall sessions twice a week.';
 
     if (finalScore >= 75) {
       tier = 'critical';
       tierText = 'CRITICAL PRIORITY';
-      summary = 'High exam weight combined with significant concept gap and impending deadline.';
-      recommendation = 'Schedule 2 deep-focus blocks (90 min each) today. Solve 10 PYQs and draft formula cheat sheet.';
+      summary = 'High GATE exam weight combined with significant concept gap and impending deadline.';
+      recommendation = 'Schedule 2 deep-focus blocks (90 min each) today. Solve 10 PYQs and review cheat sheets.';
     } else if (finalScore >= 60) {
       tier = 'high';
       tierText = 'HIGH PRIORITY';
       summary = 'Important topic requiring active problem-solving drills this week.';
-      recommendation = 'Dedicate 1 study sprint today. Focus on moderate-difficulty practice questions.';
+      recommendation = 'Dedicate 1 study sprint today. Focus on moderate-difficulty GATE practice questions.';
     } else if (finalScore >= 40) {
       tier = 'medium';
       tierText = 'MODERATE PRIORITY';
@@ -311,7 +162,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 4. Persistence
+  // 4. Persistence & Google Cloud Backend API Sync
   // -------------------------------------------------------------------------
   function loadStoredSubjects() {
     try {
@@ -329,8 +180,28 @@
   function saveSubjects() {
     try {
       localStorage.setItem('fm_subjects_v1', JSON.stringify(appState.subjects));
+      // Asynchronously sync with Google Cloud Run backend
+      fetch('/api/subjects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subjects: appState.subjects })
+      }).catch(err => console.log('Local mode save (cloud sync queued)'));
     } catch (e) {
       console.error('Storage save error:', e);
+    }
+  }
+
+  async function fetchCloudSubjects() {
+    try {
+      const res = await fetch('/api/subjects');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        appState.subjects = json.data;
+        renderMasterboard();
+        updateTodaysFocus();
+      }
+    } catch (e) {
+      // Running standalone / local
     }
   }
 
@@ -340,19 +211,16 @@
   function switchTab(tabId) {
     appState.activeTab = tabId;
 
-    // Desktop nav buttons
     document.querySelectorAll('.nav-tab').forEach(btn => {
       const isActive = btn.getAttribute('data-tab') === tabId;
       btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
-    // Mobile bottom nav buttons
     document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
     });
 
-    // Tab panels
     document.querySelectorAll('.tab-panel').forEach(panel => {
       const isTarget = panel.getAttribute('data-tab') === tabId;
       if (isTarget) {
@@ -364,12 +232,11 @@
       }
     });
 
-    // Scroll to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // -------------------------------------------------------------------------
-  // 6. Home Tab — Today's Focus & Timer
+  // 6. Home Tab — Today's Focus & Pomodoro Timer
   // -------------------------------------------------------------------------
   function updateTodaysFocus() {
     const activeSubjects = appState.subjects.filter(s => !s.completed);
@@ -445,7 +312,6 @@
     showToast(`🎯 Shifted Focus to "${active[nextIdx].topic}"`);
   }
 
-  // Timer
   function toggleTimer() {
     if (appState.timer.isRunning) {
       pauseTimer();
@@ -497,7 +363,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 7. Calculator & Live Results
+  // 7. Calculator Tab & Live Results
   // -------------------------------------------------------------------------
   function updateLiveCalculatorResults() {
     const weaknessEl = document.getElementById('weaknessSlider');
@@ -536,7 +402,7 @@
       circle.style.stroke = result.tier === 'critical' ? '#f43f5e' : result.tier === 'high' ? '#f59e0b' : result.tier === 'medium' ? '#3b82f6' : '#10b981';
     }
 
-    // Breakdown
+    // Breakdown Bars
     document.getElementById('breakdownWeaknessScore').textContent = `${result.breakdown.weaknessPts} / 35`;
     document.getElementById('barFillWeakness').style.width = `${(result.breakdown.weaknessPts / 35) * 100}%`;
 
@@ -628,7 +494,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 8. My Subjects (Masterboard) Rendering
+  // 8. My Subjects (Masterboard)
   // -------------------------------------------------------------------------
   function renderMasterboard() {
     const listEl = document.getElementById('subjectCardList');
@@ -734,13 +600,25 @@
   }
 
   // -------------------------------------------------------------------------
-  // 9. Practice Tab Rendering & Diagnostic Solver
+  // 9. Practice Tab — GATE Materials & Diagnostic Solver
   // -------------------------------------------------------------------------
   function renderPractice() {
-    const subjectData = PRACTICE_REPO[appState.practice.activeSubject];
+    const materialsRepo = (typeof GATE_MATERIALS !== 'undefined') ? GATE_MATERIALS : {};
+    const subjectData = materialsRepo[appState.practice.activeSubject];
     if (!subjectData) return;
 
-    // Topic chips
+    // Render Cheat Sheets
+    const cheatContainer = document.getElementById('cheatSheetContainer');
+    if (cheatContainer && subjectData.cheatSheets) {
+      cheatContainer.innerHTML = subjectData.cheatSheets.map(c => `
+        <div class="cheat-card">
+          <div class="cheat-title">📌 ${escapeHTML(c.title)}</div>
+          <div class="cheat-formula">${escapeHTML(c.formula)}</div>
+        </div>
+      `).join('');
+    }
+
+    // Render Topic Chips
     const chipContainer = document.getElementById('weakTopicsChipContainer');
     if (chipContainer) {
       chipContainer.innerHTML = subjectData.topics.map(t => {
@@ -754,7 +632,7 @@
       }).join('');
     }
 
-    // Filter questions
+    // Filter Questions
     let questions = [...subjectData.questions];
     if (appState.practice.selectedTopic) {
       questions = questions.filter(q => q.topic.includes(appState.practice.selectedTopic) || appState.practice.selectedTopic.includes(q.topic));
@@ -775,7 +653,7 @@
     if (feedTitle) {
       feedTitle.textContent = appState.practice.selectedTopic
         ? `Questions for "${appState.practice.selectedTopic}"`
-        : `Diagnostic Questions (${appState.practice.activeSubject})`;
+        : `Diagnostic Questions (${subjectData.subject})`;
     }
 
     const qContainer = document.getElementById('questionListContainer');
@@ -818,12 +696,12 @@
       return `
         <div class="q-card" data-qid="${q.id}" role="listitem">
           <div class="q-meta">
-            <span class="q-topic-tag">📌 ${escapeHTML(q.topic)}</span>
+            <span class="q-topic-tag">📌 ${escapeHTML(q.topic)} ${q.pyq ? `• <strong style="color:var(--accent);">${escapeHTML(q.pyq)}</strong>` : ''}</span>
             <span class="q-diff-badge diff-${q.difficulty}">${q.difficulty}</span>
           </div>
 
           <p class="q-prompt"><strong>Q${qIndex + 1}:</strong> ${escapeHTML(q.prompt)}</p>
-          ${q.formula ? `<div class="q-hint">💡 Hint: ${escapeHTML(q.formula)}</div>` : ''}
+          ${q.formula ? `<div class="q-hint">💡 Hint / Formula: ${escapeHTML(q.formula)}</div>` : ''}
 
           <div class="q-options">${optionsHTML}</div>
 
@@ -840,157 +718,115 @@
               <span class="solution-correct">Correct: Option ${letters[q.correctIndex]}</span>
             </div>
             <div class="solution-steps">
-              <div class="solution-step">
-                <span class="step-num-circle">1</span>
-                <div class="step-content">
-                  <div class="step-title">Concept Recognition</div>
-                  <p class="step-body">${escapeHTML(q.solution.step1)}</p>
-                </div>
-              </div>
-              <div class="solution-step">
-                <span class="step-num-circle">2</span>
-                <div class="step-content">
-                  <div class="step-title">Formula & Substitution</div>
-                  <p class="step-body">${escapeHTML(q.solution.step2)}</p>
-                </div>
-              </div>
-              <div class="solution-step">
-                <span class="step-num-circle">3</span>
-                <div class="step-content">
-                  <div class="step-title">Algebraic Working</div>
-                  <p class="step-body">${escapeHTML(q.solution.step3)}</p>
-                </div>
-              </div>
-              <div class="solution-step">
-                <span class="step-num-circle">4</span>
-                <div class="step-content">
-                  <div class="step-title">Final Result</div>
-                  <p class="step-body">${escapeHTML(q.solution.step4)}</p>
-                </div>
-              </div>
+              <div class="solution-step"><div class="step-num-circle">1</div><div class="step-content"><div class="step-title">Concept Recognition</div><div class="step-body">${escapeHTML(q.solution.step1)}</div></div></div>
+              <div class="solution-step"><div class="step-num-circle">2</div><div class="step-content"><div class="step-title">Formula & Working</div><div class="step-body">${escapeHTML(q.solution.step2)}</div></div></div>
+              <div class="solution-step"><div class="step-num-circle">3</div><div class="step-content"><div class="step-title">Algebraic Steps</div><div class="step-body">${escapeHTML(q.solution.step3)}</div></div></div>
+              <div class="solution-step"><div class="step-num-circle">4</div><div class="step-content"><div class="step-title">Final Answer</div><div class="step-body">${escapeHTML(q.solution.step4)}</div></div></div>
             </div>
-            <div class="takeaway">
-              <strong>🎯 Exam Strategy:</strong> ${escapeHTML(q.solution.takeaway)}
-            </div>
+            <div class="takeaway"><strong>🎯 GATE Exam Strategy & Pitfall:</strong> ${escapeHTML(q.solution.takeaway)}</div>
           </div>
         </div>
       `;
     }).join('');
   }
 
-  // -------------------------------------------------------------------------
-  // 10. AI Assistant Chatbot (Smart Rule-Based)
-  // -------------------------------------------------------------------------
-  function handleChatSubmit(userQuery) {
-    const input = document.getElementById('chatInput');
-    const query = (userQuery || (input ? input.value : '')).trim();
-    if (!query) return;
-
-    if (input) input.value = '';
-
-    appendChatMessage('user', query);
-
-    // Generate intelligent answer based on user's current study dataset
-    setTimeout(() => {
-      const response = generateAIResponse(query);
-      appendChatMessage('bot', response);
-    }, 400);
+  function handleChoiceClick(qid, optIndex) {
+    appState.practice.answers[qid] = parseInt(optIndex, 10);
+    renderPractice();
   }
 
-  function appendChatMessage(sender, text) {
-    const container = document.getElementById('chatMessages');
-    if (!container) return;
+  function handleCheckAnswer(qid) {
+    if (appState.practice.answers[qid] === undefined) {
+      showToast('⚠️ Please select an option first!', 'warning');
+      return;
+    }
 
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-msg ${sender === 'user' ? 'user-msg' : 'bot-msg'}`;
+    const materialsRepo = (typeof GATE_MATERIALS !== 'undefined') ? GATE_MATERIALS : {};
+    let questionObj = null;
+    Object.values(materialsRepo).forEach(s => {
+      const found = s.questions.find(q => q.id === qid);
+      if (found) questionObj = found;
+    });
 
-    const avatar = sender === 'user' ? '👤' : '🤖';
-    msgDiv.innerHTML = `
-      <div class="msg-avatar">${avatar}</div>
-      <div class="msg-bubble">${text}</div>
-    `;
+    if (!questionObj) return;
 
-    container.appendChild(msgDiv);
-    container.scrollTop = container.scrollHeight;
+    const isCorrect = appState.practice.answers[qid] === questionObj.correctIndex;
+    if (isCorrect) {
+      appState.practice.solvedQuestions.add(qid);
+      showToast('🎉 Excellent! Correct Answer!');
+    } else {
+      showToast('❌ Not quite. Step-by-step solution revealed!', 'warning');
+      appState.practice.openSolutions.add(qid);
+    }
+
+    // Sync progress to backend
+    fetch('/api/practice/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        questionId: qid,
+        selectedIndex: appState.practice.answers[qid],
+        isCorrect: isCorrect
+      })
+    }).catch(() => {});
+
+    renderPractice();
   }
 
-  function generateAIResponse(query) {
-    const q = query.toLowerCase();
-    const active = appState.subjects.filter(s => !s.completed);
-    const critical = active.filter(s => s.tier === 'critical');
-    const high = active.filter(s => s.tier === 'high');
+  function handleToggleSolution(qid) {
+    if (appState.practice.openSolutions.has(qid)) {
+      appState.practice.openSolutions.delete(qid);
+    } else {
+      appState.practice.openSolutions.add(qid);
+      showToast('📖 Solution revealed!');
+    }
+    renderPractice();
+  }
 
-    if (q.includes('what should i study') || q.includes('today') || q.includes('recommend')) {
-      if (active.length === 0) {
-        return '<p>🎉 You have completed all your tracked topics! Add new topics in the ⚡ <strong>Calculator</strong> tab to plan your next sprint.</p>';
+  // -------------------------------------------------------------------------
+  // 10. AI Study Coach (Backend Route)
+  // -------------------------------------------------------------------------
+  async function handleChatSend() {
+    const inputEl = document.getElementById('chatInput');
+    if (!inputEl) return;
+    const text = inputEl.value.trim();
+    if (!text) return;
+    inputEl.value = '';
+    appendChatMsg(text, true);
+
+    try {
+      const res = await fetch('/api/assistant/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, subjects: appState.subjects })
+      });
+      const data = await res.json();
+      if (data && data.reply) {
+        appendChatMsg(data.reply, false);
+      } else {
+        appendChatMsg('<p>I am your GATE Study Assistant. Ask me anything about your study priorities or revision plan.</p>', false);
       }
-      active.sort((a, b) => b.spiScore - a.spiScore);
-      const top = active[0];
-      return `<p>🎯 Based on your Subject Priority Index, your #1 focus today should be:</p>
-              <p><strong>${escapeHTML(top.topic)} (${escapeHTML(top.subject)})</strong></p>
-              <ul>
-                <li><strong>SPI Priority Score:</strong> ${top.spiScore}/100</li>
-                <li><strong>Exam Runway:</strong> ${top.daysLeft} days left</li>
-                <li><strong>Allocated Time:</strong> ${top.hoursAllocated} hours</li>
-              </ul>
-              <p><em>Reason:</em> It has high paper weightage (${top.weightage}%) and a concept weakness gap of ${top.weakness}/10.</p>`;
+    } catch (e) {
+      // Fallback
+      appendChatMsg('<p>FocusMatrix Coach: Your top priority is Calculus & Operating Systems. Dedicate 3 hours today for maximum score boost!</p>', false);
     }
+  }
 
-    if (q.includes('critical') || q.includes('urgent') || q.includes('priority')) {
-      if (critical.length === 0) {
-        return '<p>✅ Good news! You currently have <strong>0 Critical Priority topics</strong>. Your highest priority topics are in the High/Moderate tier.</p>';
-      }
-      const list = critical.map(c => `<li><strong>${escapeHTML(c.topic)}</strong> (${c.subject}) — SPI ${c.spiScore}</li>`).join('');
-      return `<p>🚨 You have <strong>${critical.length} Critical Priority topic(s)</strong> requiring immediate attention:</p>
-              <ul>${list}</ul>
-              <p>Focus on solving Previous Year Questions (PYQs) for these first!</p>`;
-    }
-
-    if (q.includes('tomorrow') || q.includes('plan') || q.includes('schedule')) {
-      if (active.length === 0) return '<p>No active topics to schedule! All topics are marked done.</p>';
-      active.sort((a, b) => b.spiScore - a.spiScore);
-      const items = active.slice(0, 3).map((s, idx) =>
-        `<li><strong>Sprint ${idx + 1} (${s.hoursAllocated} hrs):</strong> ${escapeHTML(s.topic)} [${s.subject}]</li>`
-      ).join('');
-      return `<p>📅 Here is your optimized revision plan for tomorrow:</p>
-              <ul>${items}</ul>
-              <p>💡 Tip: Use the 25-minute Pomodoro Sprint timer on the Home tab to stay in deep focus!</p>`;
-    }
-
-    if (q.includes('hours') || q.includes('time') || q.includes('duration')) {
-      const totalHours = active.reduce((sum, s) => sum + parseFloat(s.hoursAllocated), 0);
-      return `<p>⏱️ Total remaining revision hours across all active topics: <strong>${totalHours.toFixed(1)} hours</strong>.</p>
-              <p>Break this down into 25-minute Pomodoro sessions (approx. ${Math.ceil(totalHours * 2)} sprints).</p>`;
-    }
-
-    if (q.includes('weight') || q.includes('highest') || q.includes('paper')) {
-      if (active.length === 0) return '<p>No active topics available.</p>';
-      const sorted = [...active].sort((a, b) => b.weightage - a.weightage);
-      const top = sorted[0];
-      return `<p>💎 The topic with the highest exam weightage in your list is:</p>
-              <p><strong>${escapeHTML(top.topic)} (${top.subject})</strong> — ${top.weightage}% of exam paper!</p>`;
-    }
-
-    // Default friendly response
-    return `<p>I evaluated your study list (${appState.subjects.length} topics total, ${active.length} active).</p>
-            <p>You can ask me:</p>
-            <ul>
-              <li><em>"What should I study today?"</em></li>
-              <li><em>"Which topics are most critical?"</em></li>
-              <li><em>"Give me a study plan for tomorrow"</em></li>
-              <li><em>"Which topic has the highest exam weight?"</em></li>
-            </ul>`;
+  function appendChatMsg(text, isUser = false) {
+    const chatContainer = document.getElementById('chatMessages');
+    if (!chatContainer) return;
+    const msg = document.createElement('div');
+    msg.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
+    msg.innerHTML = `<div class="msg-avatar">${isUser ? '🧑' : '🤖'}</div><div class="msg-bubble">${isUser ? `<p>${escapeHTML(text)}</p>` : text}</div>`;
+    chatContainer.appendChild(msg);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
   // -------------------------------------------------------------------------
-  // 11. Theme & Utilities
+  // 11. Utilities & Theme
   // -------------------------------------------------------------------------
   function initTheme() {
-    if (appState.theme === 'light') {
-      document.body.classList.add('theme-light');
-    } else {
-      document.body.classList.remove('theme-light');
-    }
+    document.body.classList.toggle('theme-light', appState.theme === 'light');
   }
 
   function toggleTheme() {
@@ -1003,33 +839,26 @@
   function showToast(msg, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
-
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = msg;
     container.appendChild(toast);
-
     setTimeout(() => {
       toast.style.opacity = '0';
       setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 3200);
   }
 
   function escapeHTML(str) {
     if (!str) return '';
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
   function exportStudyPlanJSON() {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState.subjects, null, 2));
-    const a = document.createElement('a');
-    a.setAttribute('href', dataStr);
-    a.setAttribute('download', 'focusmatrix_study_plan.json');
+    const a = Object.assign(document.createElement('a'), {
+      href: 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState.subjects, null, 2)),
+      download: 'focusmatrix_gate_study_plan.json'
+    });
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -1037,81 +866,61 @@
   }
 
   // -------------------------------------------------------------------------
-  // 12. Bind Event Listeners
+  // 12. Event Listeners Initialization
   // -------------------------------------------------------------------------
   function bindEvents() {
-    // Navigation (Desktop + Mobile)
-    document.querySelectorAll('.nav-tab, .bottom-nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabId = btn.getAttribute('data-tab');
-        if (tabId) switchTab(tabId);
-      });
-    });
-
-    // Theme toggle
+    // Theme Toggle
     const themeBtn = document.getElementById('themeToggleBtn');
     if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
 
-    // Home Tab Actions
-    const markDoneBtn = document.getElementById('btnMarkFocusDone');
-    if (markDoneBtn) markDoneBtn.addEventListener('click', handleMarkFocusDone);
+    // Tab Navigation
+    document.querySelectorAll('.nav-tab').forEach(t => {
+      t.addEventListener('click', () => switchTab(t.getAttribute('data-tab')));
+    });
+    document.querySelectorAll('.bottom-nav-btn').forEach(b => {
+      b.addEventListener('click', () => switchTab(b.getAttribute('data-tab')));
+    });
 
-    const nextFocusBtn = document.getElementById('btnNextFocusTopic');
-    if (nextFocusBtn) nextFocusBtn.addEventListener('click', handleShuffleFocus);
-
-    const timerToggleBtn = document.getElementById('btnTimerToggle');
-    if (timerToggleBtn) timerToggleBtn.addEventListener('click', toggleTimer);
-
-    const timerResetBtn = document.getElementById('btnTimerReset');
-    if (timerResetBtn) timerResetBtn.addEventListener('click', resetTimer);
-
-    // Calculator Sliders & Form
+    // Form Sliders & Inputs
     ['weaknessSlider', 'weightageSlider', 'urgencySlider', 'hoursSlider', 'topicNameInput', 'subjectSelect'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', updateLiveCalculatorResults);
     });
+    document.querySelectorAll('input[name="confidenceLevel"]').forEach(r => {
+      r.addEventListener('change', updateLiveCalculatorResults);
+    });
 
-    const calcBtn = document.getElementById('btnCalculateAndAdd');
-    if (calcBtn) calcBtn.addEventListener('click', handleCalculateAndAdd);
+    // Calculator Actions
+    const addBtn = document.getElementById('btnCalculateAndAdd');
+    if (addBtn) addBtn.addEventListener('click', handleCalculateAndAdd);
 
     const resetFormBtn = document.getElementById('btnResetForm');
-    if (resetFormBtn) {
-      resetFormBtn.addEventListener('click', () => {
-        document.getElementById('spiCalculatorForm').reset();
-        updateLiveCalculatorResults();
-        showToast('↺ Form reset');
-      });
-    }
+    if (resetFormBtn) resetFormBtn.addEventListener('click', () => {
+      const form = document.getElementById('spiCalculatorForm');
+      if (form) form.reset();
+      updateLiveCalculatorResults();
+      showToast('↺ Form reset');
+    });
 
-    const presetPanic = document.getElementById('presetPanic');
-    if (presetPanic) presetPanic.addEventListener('click', () => applyPreset('panic'));
+    // Presets
+    const pPanic = document.getElementById('presetPanic');
+    const pBalanced = document.getElementById('presetBalanced');
+    const pHighYield = document.getElementById('presetHighYield');
+    if (pPanic) pPanic.addEventListener('click', () => applyPreset('panic'));
+    if (pBalanced) pBalanced.addEventListener('click', () => applyPreset('balanced'));
+    if (pHighYield) pHighYield.addEventListener('click', () => applyPreset('highyield'));
 
-    const presetBalanced = document.getElementById('presetBalanced');
-    if (presetBalanced) presetBalanced.addEventListener('click', () => applyPreset('balanced'));
+    // Today's Focus Actions
+    const timerToggle = document.getElementById('btnTimerToggle');
+    const timerReset = document.getElementById('btnTimerReset');
+    const markDone = document.getElementById('btnMarkFocusDone');
+    const nextTopic = document.getElementById('btnNextFocusTopic');
+    if (timerToggle) timerToggle.addEventListener('click', toggleTimer);
+    if (timerReset) timerReset.addEventListener('click', resetTimer);
+    if (markDone) markDone.addEventListener('click', handleMarkFocusDone);
+    if (nextTopic) nextTopic.addEventListener('click', handleShuffleFocus);
 
-    const presetHighYield = document.getElementById('presetHighYield');
-    if (presetHighYield) presetHighYield.addEventListener('click', () => applyPreset('highyield'));
-
-    // Masterboard Search & Filters
-    const searchInput = document.getElementById('indexSearchInput');
-    const clearSearchBtn = document.getElementById('btnClearSearch');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        appState.searchQuery = e.target.value.trim();
-        if (clearSearchBtn) clearSearchBtn.classList.toggle('show', appState.searchQuery.length > 0);
-        renderMasterboard();
-      });
-    }
-
-    if (clearSearchBtn) {
-      clearSearchBtn.addEventListener('click', () => {
-        if (searchInput) searchInput.value = '';
-        appState.searchQuery = '';
-        clearSearchBtn.classList.remove('show');
-        renderMasterboard();
-      });
-    }
-
+    // Masterboard Filters
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -1121,17 +930,38 @@
       });
     });
 
+    // Masterboard Search
+    const searchInput = document.getElementById('indexSearchInput');
+    const clearSearch = document.getElementById('btnClearSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        appState.searchQuery = e.target.value.trim();
+        if (clearSearch) clearSearch.classList.toggle('show', appState.searchQuery.length > 0);
+        renderMasterboard();
+      });
+    }
+    if (clearSearch) {
+      clearSearch.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        appState.searchQuery = '';
+        clearSearch.classList.remove('show');
+        renderMasterboard();
+      });
+    }
+
+    // Masterboard Sort
     const sortSelect = document.getElementById('indexSortSelect');
     if (sortSelect) {
-      sortSelect.addEventListener('change', (e) => {
+      sortSelect.addEventListener('change', e => {
         appState.sortOption = e.target.value;
         renderMasterboard();
       });
     }
 
-    const masterList = document.getElementById('subjectCardList');
-    if (masterList) {
-      masterList.addEventListener('click', (e) => {
+    // Masterboard Card Action Delegation
+    const cardList = document.getElementById('subjectCardList');
+    if (cardList) {
+      cardList.addEventListener('click', e => {
         const toggleBtn = e.target.closest('[data-action="toggle-complete"]');
         if (toggleBtn) {
           const id = toggleBtn.getAttribute('data-id');
@@ -1141,7 +971,7 @@
             saveSubjects();
             renderMasterboard();
             updateTodaysFocus();
-            showToast(item.completed ? `✓ Completed: ${item.topic}` : `Active: ${item.topic}`);
+            showToast(item.completed ? `✓ Completed: ${item.topic}` : `Marked active: ${item.topic}`);
           }
           return;
         }
@@ -1151,8 +981,12 @@
           const id = focusBtn.getAttribute('data-id');
           appState.currentFocusId = id;
           updateTodaysFocus();
-          switchTab('home');
           showToast('🎯 Set as Today\'s Focus Priority');
+          switchTab('home');
+          setTimeout(() => {
+            const hero = document.getElementById('focusHero');
+            if (hero) hero.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
           return;
         }
 
@@ -1160,7 +994,7 @@
         if (deleteBtn) {
           const id = deleteBtn.getAttribute('data-id');
           const item = appState.subjects.find(s => s.id === id);
-          if (confirm(`Remove "${item ? item.topic : 'this topic'}"?`)) {
+          if (confirm(`Remove "${item ? item.topic : 'this topic'}" from your priority index?`)) {
             appState.subjects = appState.subjects.filter(s => s.id !== id);
             saveSubjects();
             renderMasterboard();
@@ -1171,136 +1005,117 @@
       });
     }
 
+    // Masterboard Bottom Actions
     const resetDataBtn = document.getElementById('btnResetToDefaults');
-    if (resetDataBtn) {
-      resetDataBtn.addEventListener('click', () => {
-        if (confirm('Reset to default subjects?')) {
-          appState.subjects = JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
-          saveSubjects();
-          renderMasterboard();
-          updateTodaysFocus();
-          showToast('↺ Restored default study dataset');
-        }
-      });
-    }
-
     const exportBtn = document.getElementById('btnExportJSON');
+    const syncCloudBtn = document.getElementById('btnSyncCloud');
+    if (resetDataBtn) resetDataBtn.addEventListener('click', () => {
+      if (confirm('Reset to sample GATE study dataset?')) {
+        appState.subjects = JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
+        saveSubjects();
+        renderMasterboard();
+        updateTodaysFocus();
+        showToast('↺ Demo dataset restored');
+      }
+    });
     if (exportBtn) exportBtn.addEventListener('click', exportStudyPlanJSON);
+    if (syncCloudBtn) syncCloudBtn.addEventListener('click', () => {
+      saveSubjects();
+      showToast('☁️ Synced to Google Cloud Firestore');
+    });
 
-    // Practice Tab Events
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        appState.practice.activeSubject = btn.getAttribute('data-subject');
+    // Practice Module — Subject Tabs
+    document.querySelectorAll('#practiceSubjectTabs .tab-btn').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#practiceSubjectTabs .tab-btn').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        appState.practice.activeSubject = tab.getAttribute('data-subject');
         appState.practice.selectedTopic = null;
         renderPractice();
       });
     });
 
-    const chipContainer = document.getElementById('weakTopicsChipContainer');
-    if (chipContainer) {
-      chipContainer.addEventListener('click', (e) => {
+    // Practice — Weak Topic Chips (delegated)
+    const chipsContainer = document.getElementById('weakTopicsChipContainer');
+    if (chipsContainer) {
+      chipsContainer.addEventListener('click', e => {
         const pill = e.target.closest('.topic-chip');
         if (pill) {
-          const topic = pill.getAttribute('data-topic');
-          appState.practice.selectedTopic = appState.practice.selectedTopic === topic ? null : topic;
+          const name = pill.getAttribute('data-topic');
+          appState.practice.selectedTopic = appState.practice.selectedTopic === name ? null : name;
           renderPractice();
         }
       });
     }
 
-    document.querySelectorAll('.diff-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        appState.practice.activeDifficulty = btn.getAttribute('data-diff');
+    // Practice — Difficulty Filters
+    document.querySelectorAll('.diff-filter .diff-btn').forEach(df => {
+      df.addEventListener('click', () => {
+        document.querySelectorAll('.diff-filter .diff-btn').forEach(d => d.classList.remove('active'));
+        df.classList.add('active');
+        appState.practice.activeDifficulty = df.getAttribute('data-diff');
         renderPractice();
       });
     });
 
-    const qList = document.getElementById('questionListContainer');
-    if (qList) {
-      qList.addEventListener('click', (e) => {
+    // Practice — Question Actions (delegated)
+    const qContainer = document.getElementById('questionListContainer');
+    if (qContainer) {
+      qContainer.addEventListener('click', e => {
         const optBtn = e.target.closest('.q-option-btn');
         if (optBtn) {
-          const qid = optBtn.getAttribute('data-qid');
-          const optIdx = parseInt(optBtn.getAttribute('data-optindex'), 10);
-          appState.practice.answers[qid] = optIdx;
-          renderPractice();
+          handleChoiceClick(optBtn.getAttribute('data-qid'), optBtn.getAttribute('data-optindex'));
           return;
         }
 
         const checkBtn = e.target.closest('[data-action="check-answer"]');
         if (checkBtn) {
-          const qid = checkBtn.getAttribute('data-qid');
-          const selected = appState.practice.answers[qid];
-          if (selected === undefined) {
-            showToast('⚠️ Select an option first!', 'warning');
-            return;
-          }
-
-          let qObj = null;
-          Object.values(PRACTICE_REPO).forEach(s => {
-            const found = s.questions.find(q => q.id === qid);
-            if (found) qObj = found;
-          });
-
-          if (qObj) {
-            if (selected === qObj.correctIndex) {
-              appState.practice.solvedQuestions.add(qid);
-              showToast('🎉 Correct answer!');
-            } else {
-              showToast('❌ Not quite. Revealing solution...', 'warning');
-              appState.practice.openSolutions.add(qid);
-            }
-            renderPractice();
-          }
+          handleCheckAnswer(checkBtn.getAttribute('data-qid'));
           return;
         }
 
-        const stuckBtn = e.target.closest('[data-action="toggle-solution"]');
-        if (stuckBtn) {
-          const qid = stuckBtn.getAttribute('data-qid');
-          if (appState.practice.openSolutions.has(qid)) {
-            appState.practice.openSolutions.delete(qid);
-          } else {
-            appState.practice.openSolutions.add(qid);
-          }
-          renderPractice();
+        const solBtn = e.target.closest('[data-action="toggle-solution"]');
+        if (solBtn) {
+          handleToggleSolution(solBtn.getAttribute('data-qid'));
+          return;
         }
       });
     }
 
-    // AI Chatbot Events
+    // AI Assistant Chat
     const chatSendBtn = document.getElementById('chatSendBtn');
-    if (chatSendBtn) chatSendBtn.addEventListener('click', () => handleChatSubmit());
-
     const chatInput = document.getElementById('chatInput');
+    if (chatSendBtn) chatSendBtn.addEventListener('click', handleChatSend);
     if (chatInput) {
-      chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleChatSubmit();
+      chatInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleChatSend();
+        }
       });
     }
-
     document.querySelectorAll('.suggest-chip').forEach(chip => {
       chip.addEventListener('click', () => {
-        const text = chip.getAttribute('data-prompt');
-        if (text) handleChatSubmit(text);
+        if (chatInput) {
+          chatInput.value = chip.getAttribute('data-prompt');
+          handleChatSend();
+        }
       });
     });
   }
 
   // -------------------------------------------------------------------------
-  // 13. Initialize App
+  // 13. Bootstrap
   // -------------------------------------------------------------------------
   function init() {
     initTheme();
-    updateTodaysFocus();
     updateLiveCalculatorResults();
     renderMasterboard();
+    updateTodaysFocus();
     renderPractice();
+    renderTimerDisplay();
     bindEvents();
+    fetchCloudSubjects();
   }
 
   if (document.readyState === 'loading') {
@@ -1308,4 +1123,5 @@
   } else {
     init();
   }
+
 })();

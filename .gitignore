@@ -4,7 +4,11 @@ node_modules/
 # VS Code settings
 .vscode/
 
-# Environment / OS
+# Environment / Secrets / OS
+.env
+.env.*
+*.log
+firebase-debug.log
 .DS_Store
 Thumbs.db
-*.log
+

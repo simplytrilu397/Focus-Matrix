@@ -3,17 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>FocusMatrix — GATE & Semester Adaptive Study Planner</title>
-  <meta name="description" content="Adaptive GATE exam & semester study planner powered by Subject Priority Index (SPI), Cloud Firestore, Firebase Auth, and AI Assistant.">
+  <title>FocusMatrix — Adaptive GATE Exam Study Engine on Google Cloud</title>
+  <meta name="description" content="Adaptive GATE & semester study planner powered by Subject Priority Index (SPI), Google Cloud Run, and Cloud Firestore.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
-
-  <!-- Firebase JavaScript Modular/Compat SDK v10 (Google Cloud) -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -33,7 +28,7 @@
           </div>
           <div class="brand-text-col">
             <span class="brand-name">FocusMatrix</span>
-            <span class="brand-badge">GATE CS & Cloud</span>
+            <span class="brand-badge">Google Cloud Run</span>
           </div>
         </div>
 
@@ -43,20 +38,15 @@
           <button class="nav-tab" data-tab="calculator" aria-selected="false">⚡ Calculator</button>
           <button class="nav-tab" data-tab="subjects" aria-selected="false">📋 My Subjects</button>
           <button class="nav-tab" data-tab="practice" aria-selected="false">🧠 GATE Materials</button>
-          <button class="nav-tab" data-tab="assistant" aria-selected="false">💬 AI Assistant</button>
+          <button class="nav-tab" data-tab="assistant" aria-selected="false">💬 AI Coach</button>
         </nav>
 
-        <!-- Right Header Actions (Auth, Cloud Sync, Theme) -->
+        <!-- Right Header Actions (Cloud Sync & Theme) -->
         <div class="header-actions">
-          <div class="cloud-sync-pill" id="cloudSyncPill" title="Cloud Firestore Sync Status">
+          <div class="cloud-sync-pill" id="cloudSyncPill" title="Cloud Firestore Real-time Status">
             <span class="sync-dot"></span>
-            <span class="sync-text" id="syncStatusText">Cloud Ready</span>
+            <span class="sync-text" id="syncStatusText">Cloud Live</span>
           </div>
-
-          <button class="user-auth-btn" id="userAuthBtn" title="Account & Firebase Login">
-            <span class="user-avatar" id="userAvatarText">👤</span>
-            <span class="user-label" id="userDisplayName">Sign In</span>
-          </button>
 
           <button class="theme-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark">
             <span class="icon-dark">🌙</span>
@@ -77,7 +67,7 @@
             <div class="focus-hero-meta">
               <span class="subject-chip" id="focusSubjectBadge">Engineering Mathematics</span>
               <span class="streak-badge" id="streakBadge">🔥 7-Day Streak</span>
-              <span class="cloud-tag" id="focusCloudTag">☁️ Synced</span>
+              <span class="cloud-tag" id="focusCloudTag">☁️ Cloud Firestore Active</span>
             </div>
             <h2 class="focus-hero-title" id="focusTopicTitle">Calculus — Integration by Parts & Definite Integrals</h2>
             <p class="focus-hero-reason" id="focusTopicReason">Highest combined GATE exam weight and critical difficulty gap.</p>
@@ -97,7 +87,7 @@
             </div>
             <div class="focus-hero-actions">
               <button class="btn-primary" id="btnMarkFocusDone">✓ Mark Complete</button>
-              <button class="btn-ghost" id="btnNextFocusTopic">⇄ Shuffle Topic</button>
+              <button class="btn-ghost" id="btnNextFocusTopic">⇄ Shuffle Focus</button>
             </div>
           </div>
         </div>
@@ -135,7 +125,7 @@
         <div class="card results-card" id="resultsSection">
           <div class="card-header-row">
             <h3 class="card-heading">Priority Score</h3>
-            <span class="live-dot"><span class="dot-pulse"></span> Live</span>
+            <span class="live-dot"><span class="dot-pulse"></span> Live Engine</span>
           </div>
           <div class="score-row">
             <div class="gauge-wrap">
@@ -289,7 +279,7 @@
           <div class="card-header-row">
             <div>
               <h3 class="card-heading">📋 Priority Index</h3>
-              <span class="muted-label" id="cloudStorageStatus">☁️ Cloud Firestore Synced</span>
+              <span class="muted-label" id="cloudStorageStatus">☁️ Cloud Firestore Connected</span>
             </div>
             <span class="count-pill"><span id="totalSubjectsCount">5</span> Topics</span>
           </div>
@@ -334,8 +324,8 @@
 
           <!-- Bottom actions -->
           <div class="card-bottom-actions">
-            <button class="btn-ghost" id="btnSyncCloud">☁️ Sync to Cloud</button>
-            <button class="btn-ghost" id="btnResetToDefaults">↺ Reset Data</button>
+            <button class="btn-ghost" id="btnSyncCloud">☁️ Sync to Firestore</button>
+            <button class="btn-ghost" id="btnResetToDefaults">↺ Reset Defaults</button>
             <button class="btn-ghost" id="btnExportJSON">📥 Export JSON</button>
           </div>
         </div>
@@ -347,7 +337,7 @@
           <div class="card-header-row">
             <div>
               <h3 class="card-heading">🧠 GATE Materials & PYQ Solver</h3>
-              <span class="muted-label" id="gateSyllabusBadge">Official GATE CS Syllabus</span>
+              <span class="muted-label" id="gateSyllabusBadge">Official GATE CS Curriculum</span>
             </div>
             <span class="count-pill" id="practiceSolvedCount">0 / 2 Solved</span>
           </div>
@@ -381,11 +371,6 @@
 
           <!-- Questions container -->
           <div class="questions-list" id="questionListContainer" role="list"></div>
-
-          <!-- Cloud Materials Actions -->
-          <div class="card-bottom-actions">
-            <button class="btn-ghost" id="btnSeedFirestore">☁️ Seed All Materials to Firestore</button>
-          </div>
         </div>
       </section>
 
@@ -393,8 +378,8 @@
       <section class="tab-panel" id="panel-assistant" data-tab="assistant" aria-label="AI Assistant" hidden>
         <div class="card chat-card">
           <div class="card-header-row">
-            <h3 class="card-heading">💬 GATE Study Assistant</h3>
-            <span class="muted-label">Smart AI Coach</span>
+            <h3 class="card-heading">💬 GATE AI Coach</h3>
+            <span class="muted-label">Google Cloud Backend</span>
           </div>
 
           <!-- Suggested prompts -->
@@ -411,7 +396,7 @@
             <div class="chat-msg bot-msg">
               <div class="msg-avatar">🤖</div>
               <div class="msg-bubble">
-                <p>Hey! I'm your GATE & Semester Study Assistant. I can analyze your priority index, track your weak concepts, and draft personalized revision schedules. Ask me anything — like <em>"What should I study today?"</em> or <em>"Which topics are critical?"</em></p>
+                <p>Hey! I'm your GATE & Semester AI Coach running on Google Cloud. I analyze your Subject Priority Index (SPI), optimize your study runway, and recommend high-yield topic drills. Ask me anything — like <em>"What should I study today?"</em> or <em>"Which topics are critical?"</em></p>
               </div>
             </div>
           </div>
@@ -452,95 +437,11 @@
 
   </div><!-- /app-shell -->
 
-  <!-- ======================== AUTH & CLOUD MODAL ======================== -->
-  <div class="modal-backdrop" id="authModalBackdrop" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-header">
-        <div class="modal-title-row">
-          <span class="modal-icon">🔐</span>
-          <h3 class="modal-title" id="modalTitle">Account & Cloud Sync</h3>
-        </div>
-        <button class="modal-close-btn" id="btnAuthModalClose" aria-label="Close modal">✕</button>
-      </div>
-
-      <!-- Auth Tab Switches -->
-      <div class="auth-tabs" role="tablist">
-        <button class="auth-tab active" id="tabSignIn" data-auth-tab="signin">Sign In</button>
-        <button class="auth-tab" id="tabSignUp" data-auth-tab="signup">Register</button>
-        <button class="auth-tab" id="tabCloudConfig" data-auth-tab="config">Firebase Settings</button>
-      </div>
-
-      <div class="modal-body">
-        <!-- Sign In & Register Form -->
-        <form id="authForm" onsubmit="return false;">
-          <div class="form-group" id="groupDisplayName" style="display: none;">
-            <label for="authDisplayName" class="form-label">Your Name</label>
-            <input type="text" id="authDisplayName" class="form-control" placeholder="e.g. Alex Sharma">
-          </div>
-
-          <div class="form-group">
-            <label for="authEmail" class="form-label">Email Address</label>
-            <input type="email" id="authEmail" class="form-control" placeholder="student@gate.edu" required>
-          </div>
-
-          <div class="form-group">
-            <label for="authPassword" class="form-label">Password</label>
-            <input type="password" id="authPassword" class="form-control" placeholder="••••••••" required>
-          </div>
-
-          <div class="auth-actions">
-            <button type="button" class="btn-primary auth-submit-btn" id="btnAuthSubmit">Sign In</button>
-            <button type="button" class="btn-ghost google-btn" id="btnGoogleSignIn">
-              <span class="google-icon">G</span> Continue with Google
-            </button>
-          </div>
-        </form>
-
-        <!-- Firebase Cloud Project Config View -->
-        <div id="cloudConfigSection" style="display: none;">
-          <p class="config-desc">Manage your Firebase project connection for Google Cloud deployment:</p>
-          <div class="form-group">
-            <label for="cfgProjectId" class="form-label">Firebase / Google Cloud Project ID</label>
-            <input type="text" id="cfgProjectId" class="form-control" placeholder="focusmatrix-gate">
-          </div>
-          <div class="form-group">
-            <label for="cfgApiKey" class="form-label">Web API Key</label>
-            <input type="text" id="cfgApiKey" class="form-control" placeholder="AIzaSy...">
-          </div>
-          <div class="form-group">
-            <label for="cfgAuthDomain" class="form-label">Auth Domain</label>
-            <input type="text" id="cfgAuthDomain" class="form-control" placeholder="your-project.firebaseapp.com">
-          </div>
-          <div class="auth-actions">
-            <button type="button" class="btn-primary" id="btnSaveFirebaseConfig">💾 Save Configuration</button>
-          </div>
-        </div>
-
-        <!-- Logged In State Profile View -->
-        <div id="userProfileSection" style="display: none;">
-          <div class="profile-card">
-            <div class="profile-avatar-lg" id="profileAvatarLarge">👤</div>
-            <div class="profile-info">
-              <h4 class="profile-name" id="profileNameDisplay">GATE Student</h4>
-              <span class="profile-email" id="profileEmailDisplay">student@gate.edu</span>
-              <span class="cloud-status-tag" id="profileCloudStatus">☁️ Cloud Firestore Active</span>
-            </div>
-          </div>
-          <div class="auth-actions">
-            <button type="button" class="btn-primary" id="btnTriggerCloudSync">☁️ Sync All Subjects Now</button>
-            <button type="button" class="btn-ghost" id="btnLogoutUser">🚪 Log Out</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast container -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Scripts -->
   <script src="gate-materials.js"></script>
-  <script src="firebase-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,27 @@
+{
+  "name": "focusmatrix-gate-cloud",
+  "version": "2.0.0",
+  "description": "Adaptive GATE Study Planner deployed on Google Cloud Run with Cloud Firestore",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "google-cloud",
+    "cloud-run",
+    "firestore",
+    "gate",
+    "study-planner"
+  ],
+  "author": "FocusMatrix Team",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/firestore": "^7.11.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
