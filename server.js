@@ -3,6 +3,9 @@
  * Provides REST APIs, Multimodal Visual Problem Solving, and Cloud Firestore Integration.
  */
 
+const express = require('express');
+const path = require('path');
+
 let Firestore = null;
 try {
   const gcp = require('@google-cloud/firestore');
