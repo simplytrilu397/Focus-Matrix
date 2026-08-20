@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User profile and private study plans
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // User's custom tracked subjects and priorities
+      match /subjects/{subjectId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User's practice questions solving history
+      match /practiceProgress/{progressId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Global GATE Study Materials and Question Banks (publicly readable, admin writable)
+    match /gate_materials/{materialId} {
+      allow read: if true;
+      allow write: if request.auth != null; // or admin
+      
+      match /questions/{questionId} {
+        allow read: if true;
+        allow write: if request.auth != null;
+      }
+    }
+  }
+}
